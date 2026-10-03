@@ -1,6 +1,6 @@
 """
 Main UI module for Barcode Generator.
-Vibrant / Colorful Modern UI layout with split resizable PanedWindow.
+Red & White Modern Edition layout with split resizable PanedWindow.
 """
 
 import tkinter as tk
@@ -16,7 +16,7 @@ class App(ctk.CTk):
         super().__init__()
 
         # --- Window Config ---
-        self.title("Barcode Generator - Vibrant Modern Edition")
+        self.title("Barcode Generator - Red & White Edition")
         self.geometry("1280x840")
         self.minsize(820, 580)
         ctk.set_appearance_mode("light")
@@ -27,11 +27,11 @@ class App(ctk.CTk):
         self.grid_cols_setting = "Tự động"
         self.color_palette_name = "Cổ điển"
 
-        # Vibrant Color Palettes
+        # Color Palettes
         self.color_palettes = {
             "Cổ điển": {"fg": "#000000", "bg": "#FFFFFF"},
-            "Navy Rực Rỡ": {"fg": "#1E3A8A", "bg": "#FFFFFF"},
-            "Đỏ Đô Vibrant": {"fg": "#BE123C", "bg": "#FFFFFF"},
+            "Đỏ Rực Rỡ": {"fg": "#DC2626", "bg": "#FFFFFF"},
+            "Navy Đậm": {"fg": "#1E3A8A", "bg": "#FFFFFF"},
             "Xanh Emerald": {"fg": "#047857", "bg": "#FFFFFF"},
             "Tím Violet": {"fg": "#6D28D9", "bg": "#FFFFFF"},
         }
@@ -60,18 +60,18 @@ class App(ctk.CTk):
             self,
             orient=tk.HORIZONTAL,
             sashwidth=6,
-            bg="#C7D2FE",  # Soft Indigo Sash
+            bg="#FECDD3",  # Soft Red Sash Divider
             bd=0,
             sashrelief="flat",
         )
         self.paned.pack(fill="both", expand=True)
 
-        # Left Pane (Control & Input Panel - Vibrant Light Slate)
-        self.left_pane = ctk.CTkFrame(self.paned, fg_color="#F8FAFC", corner_radius=0)
+        # Left Pane (Control & Input Panel - Crisp White)
+        self.left_pane = ctk.CTkFrame(self.paned, fg_color="#FFFFFF", corner_radius=0)
         self.paned.add(self.left_pane, minsize=330, width=420)
 
-        # Right Pane (Result Grid Panel - Soft Indigo-Tint Background)
-        self.right_pane = ctk.CTkFrame(self.paned, fg_color="#EEF2FF", corner_radius=0)
+        # Right Pane (Result Grid Panel - Soft Warm White Background)
+        self.right_pane = ctk.CTkFrame(self.paned, fg_color="#FFF1F2", corner_radius=0)
         self.paned.add(self.right_pane, minsize=460)
 
         # Populate left & right panes
@@ -79,36 +79,36 @@ class App(ctk.CTk):
         self._build_right_pane()
 
     # ================================================================
-    #  LEFT PANE (INPUT & CONTROLS - VIBRANT MODERN STYLE)
+    #  LEFT PANE (RED & WHITE MODERN STYLE)
     # ================================================================
     def _build_left_pane(self):
         # --- Header Section ---
         header_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
         header_frame.pack(fill="x", padx=18, pady=(16, 6))
 
-        # Vibrant Badge
-        badge = ctk.CTkFrame(header_frame, fg_color="#E0E7FF", corner_radius=6)
+        # Red & White Edition Badge
+        badge = ctk.CTkFrame(header_frame, fg_color="#FEE2E2", corner_radius=6)
         badge.pack(anchor="w", pady=(0, 4))
 
         ctk.CTkLabel(
             badge,
-            text="✨ VIBRANT MODERN EDITION",
+            text="✨ RED & WHITE EDITION",
             font=ctk.CTkFont(size=10, weight="bold"),
-            text_color="#4338CA",
+            text_color="#991B1B",
         ).pack(padx=8, pady=2)
 
         ctk.CTkLabel(
             header_frame,
             text="Barcode Generator",
             font=ctk.CTkFont(size=24, weight="bold"),
-            text_color="#1E1B4B",
+            text_color="#991B1B",
         ).pack(anchor="w")
 
         ctk.CTkLabel(
             header_frame,
             text="Tạo mã vạch Code 128C & QR Code nét cao",
             font=ctk.CTkFont(size=12),
-            text_color="#6366F1",
+            text_color="#DC2626",
         ).pack(anchor="w")
 
         # --- Section 1: Mode Selector ---
@@ -119,7 +119,7 @@ class App(ctk.CTk):
             mode_frame,
             text="🎯 Chọn loại mã:",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color="#312E81",
+            text_color="#991B1B",
         ).pack(anchor="w", pady=(0, 4))
 
         self.mode_selector = ctk.CTkSegmentedButton(
@@ -127,20 +127,20 @@ class App(ctk.CTk):
             values=["Code 128C", "QR Code"],
             command=self._on_mode_change,
             font=ctk.CTkFont(size=12, weight="bold"),
-            selected_color="#4F46E5",
-            selected_hover_color="#4338CA",
-            unselected_color="#E0E7FF",
-            unselected_hover_color="#C7D2FE",
-            text_color="#1E1B4B",
+            selected_color="#DC2626",
+            selected_hover_color="#B91C1C",
+            unselected_color="#F1F5F9",
+            unselected_hover_color="#E2E8F0",
+            text_color="#0F172A",
         )
         self.mode_selector.set("Code 128C")
         self.mode_selector.pack(fill="x")
 
-        # --- Section 2: Input Textarea + Clear Button ---
+        # --- Section 2: Input Textarea + Balanced Refresh Button ---
         input_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
         input_frame.pack(fill="x", padx=18, pady=(8, 4))
 
-        # Title row with Clear button
+        # Title row with Refresh button
         input_title_row = ctk.CTkFrame(input_frame, fg_color="transparent")
         input_title_row.pack(fill="x", pady=(0, 4))
 
@@ -148,19 +148,21 @@ class App(ctk.CTk):
             input_title_row,
             text="📝 Danh sách mã (1 mã / dòng):",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color="#312E81",
+            text_color="#991B1B",
         ).pack(side="left")
 
-        # Quick Clear Input Button
+        # Balanced Refresh Button
         self.btn_clear = ctk.CTkButton(
             input_title_row,
-            text="🗑️ Xóa nhập",
+            text="🔄 Refresh",
             font=ctk.CTkFont(size=11, weight="bold"),
-            fg_color="#FEE2E2",
+            fg_color="#FEF2F2",
             text_color="#DC2626",
-            hover_color="#FCA5A5",
-            width=75,
-            height=26,
+            hover_color="#FEE2E2",
+            border_color="#FCA5A5",
+            border_width=1,
+            width=95,
+            height=28,
             corner_radius=6,
             command=self._clear_input,
         )
@@ -171,7 +173,7 @@ class App(ctk.CTk):
             height=150,
             font=ctk.CTkFont(family="Segoe UI", size=13),
             border_width=1.5,
-            border_color="#C7D2FE",
+            border_color="#FCA5A5",
             fg_color="#FFFFFF",
             corner_radius=8,
         )
@@ -185,7 +187,7 @@ class App(ctk.CTk):
             info_row,
             text="Chỉ chứa số, số lượng chữ số chẵn",
             font=ctk.CTkFont(size=11),
-            text_color="#6366F1",
+            text_color="#DC2626",
         )
         self.helper_label.pack(side="left")
 
@@ -193,7 +195,7 @@ class App(ctk.CTk):
             info_row,
             text="Số lượng: 0",
             font=ctk.CTkFont(size=11, weight="bold"),
-            text_color="#4338CA",
+            text_color="#991B1B",
         )
         self.count_label.pack(side="right")
 
@@ -201,7 +203,7 @@ class App(ctk.CTk):
         self.textbox.bind("<KeyRelease>", self._update_line_count)
         self.textbox.bind("<ButtonRelease>", self._update_line_count)
 
-        # --- Section 3: Generate Button ---
+        # --- Section 3: Primary Generate Button (Bright Crimson Red) ---
         btn_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
         btn_frame.pack(fill="x", padx=18, pady=(8, 10))
 
@@ -210,19 +212,19 @@ class App(ctk.CTk):
             text="🚀 TẠO MÃ  (Ctrl+Enter)",
             font=ctk.CTkFont(size=14, weight="bold"),
             height=44,
-            fg_color="#4F46E5",
-            hover_color="#4338CA",
+            fg_color="#DC2626",
+            hover_color="#B91C1C",
             corner_radius=10,
             command=self._trigger_generation,
         )
         self.btn_generate.pack(fill="x")
 
         # Separator line
-        ctk.CTkFrame(self.left_pane, height=1.5, fg_color="#E0E7FF").pack(
+        ctk.CTkFrame(self.left_pane, height=1.5, fg_color="#FECDD3").pack(
             fill="x", padx=18, pady=4
         )
 
-        # --- Section 4: Display Configuration Controls ---
+        # --- Section 4: Display Configuration Controls (High Contrast Fonts & Text) ---
         config_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
         config_frame.pack(fill="x", padx=18, pady=(6, 12))
 
@@ -230,15 +232,15 @@ class App(ctk.CTk):
             config_frame,
             text="⚙️ CẤU HÌNH HIỂN THỊ",
             font=ctk.CTkFont(size=12, weight="bold"),
-            text_color="#3730A3",
+            text_color="#991B1B",
         ).pack(anchor="w", pady=(0, 6))
 
-        # 4A: Kích thước mã (Zoom scale)
+        # 4A: Kích thước mã (Zoom scale) - High Contrast Unselected Text
         ctk.CTkLabel(
             config_frame,
             text="Kích thước mã:",
             font=ctk.CTkFont(size=12, weight="bold"),
-            text_color="#4338CA",
+            text_color="#991B1B",
         ).pack(anchor="w", pady=(2, 2))
 
         self.size_selector = ctk.CTkSegmentedButton(
@@ -246,19 +248,21 @@ class App(ctk.CTk):
             values=["75%", "100%", "130%", "160%"],
             command=self._on_size_change,
             font=ctk.CTkFont(size=11, weight="bold"),
-            selected_color="#6366F1",
-            selected_hover_color="#4F46E5",
-            unselected_color="#E0E7FF",
+            selected_color="#DC2626",
+            selected_hover_color="#B91C1C",
+            unselected_color="#F1F5F9",
+            unselected_hover_color="#E2E8F0",
+            text_color="#0F172A",
         )
         self.size_selector.set("100%")
         self.size_selector.pack(fill="x", pady=(0, 8))
 
-        # 4B: Số cột hiển thị (Grid columns)
+        # 4B: Số cột hiển thị (Grid columns) - High Contrast Unselected Text
         ctk.CTkLabel(
             config_frame,
             text="Số mã trên 1 dòng (Số cột):",
             font=ctk.CTkFont(size=12, weight="bold"),
-            text_color="#4338CA",
+            text_color="#991B1B",
         ).pack(anchor="w", pady=(2, 2))
 
         self.cols_selector = ctk.CTkSegmentedButton(
@@ -266,9 +270,11 @@ class App(ctk.CTk):
             values=["Tự động", "1 Cột", "2 Cột", "3 Cột"],
             command=self._on_cols_change,
             font=ctk.CTkFont(size=11, weight="bold"),
-            selected_color="#6366F1",
-            selected_hover_color="#4F46E5",
-            unselected_color="#E0E7FF",
+            selected_color="#DC2626",
+            selected_hover_color="#B91C1C",
+            unselected_color="#F1F5F9",
+            unselected_hover_color="#E2E8F0",
+            text_color="#0F172A",
         )
         self.cols_selector.set("Tự động")
         self.cols_selector.pack(fill="x", pady=(0, 8))
@@ -278,7 +284,7 @@ class App(ctk.CTk):
             config_frame,
             text="Màu sắc mã:",
             font=ctk.CTkFont(size=12, weight="bold"),
-            text_color="#4338CA",
+            text_color="#991B1B",
         ).pack(anchor="w", pady=(2, 2))
 
         self.color_selector = ctk.CTkOptionMenu(
@@ -287,20 +293,21 @@ class App(ctk.CTk):
             command=self._on_color_change,
             font=ctk.CTkFont(size=12, weight="bold"),
             dropdown_font=ctk.CTkFont(size=12),
-            fg_color="#312E81",
-            button_color="#4338CA",
-            button_hover_color="#4F46E5",
+            fg_color="#991B1B",
+            button_color="#7F1D1D",
+            button_hover_color="#B91C1C",
+            text_color="#FFFFFF",
         )
         self.color_selector.set("Cổ điển")
         self.color_selector.pack(fill="x", pady=(0, 8))
 
     # ================================================================
-    #  RIGHT PANE (RESULT GRID - VIBRANT MODERN STYLE)
+    #  RIGHT PANE (RESULT GRID - RED & WHITE STYLE)
     # ================================================================
     def _build_right_pane(self):
-        # Stats bar container with vibrant gradient styling
+        # Stats bar container with clean red accent border
         stats_container = ctk.CTkFrame(
-            self.right_pane, fg_color="#FFFFFF", corner_radius=10, border_width=1, border_color="#C7D2FE"
+            self.right_pane, fg_color="#FFFFFF", corner_radius=10, border_width=1.5, border_color="#FECDD3"
         )
         stats_container.pack(fill="x", side="top", padx=14, pady=(14, 4))
 
@@ -308,7 +315,7 @@ class App(ctk.CTk):
             stats_container,
             text="✨ Nhập dữ liệu và nhấn 'Tạo Mã' để bắt đầu",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color="#4338CA",
+            text_color="#991B1B",
         )
         self.stats_label.pack(side="left", padx=14, pady=8)
 
@@ -326,14 +333,14 @@ class App(ctk.CTk):
             self.empty_frame,
             text="Chưa Có Mã Nào Được Tạo",
             font=ctk.CTkFont(size=17, weight="bold"),
-            text_color="#3730A3",
+            text_color="#991B1B",
         ).pack(pady=(10, 4))
 
         ctk.CTkLabel(
             self.empty_frame,
             text="Dán danh sách mã vào khung bên trái và nhấn nút '🚀 TẠO MÃ'",
             font=ctk.CTkFont(size=13),
-            text_color="#6366F1",
+            text_color="#DC2626",
         ).pack()
 
         # Scrollable grid frame
@@ -568,7 +575,7 @@ class App(ctk.CTk):
                 parent,
                 corner_radius=12,
                 border_width=1.5,
-                border_color="#C7D2FE",
+                border_color="#FCA5A5",
                 fg_color="#FFFFFF",
                 width=card_width,
             )
@@ -605,7 +612,7 @@ class App(ctk.CTk):
                 card,
                 text=disp_text,
                 font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
-                text_color="#1E1B4B",
+                text_color="#991B1B",
                 anchor="center",
             ).pack(padx=14, pady=(2, 12), fill="x")
 
