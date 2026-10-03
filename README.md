@@ -1,78 +1,71 @@
-# Barcode Generator (Code 128C & QR Code)
+# Barcode Generator (Code 128C & QR Code) - Red & White Edition
 
-Ứng dụng Desktop Windows nhẹ, mượt và chính xác cao dùng để tự động tạo mã vạch **Code 128C** và **QR Code** từ danh sách dữ liệu nhập vào, hiển thị dạng lưới (Grid) để đối chiếu trực tiếp trên màn hình.
+Ứng dụng Desktop Windows nhẹ, mượt và chính xác cao dùng để tự động tạo mã vạch **Code 128C** và **QR Code** từ danh sách dữ liệu nhập vào, hiển thị dạng lưới (Grid) căn giữa đẹp mắt để đối chiếu trực tiếp trên màn hình.
 
----
-
-## 🌟 Tính năng chính
-
-- **Tạo mã vạch Code 128C**: Tự động xác thực dữ liệu chữ số chẵn (Subtype C), giữ nguyên các số 0 ở đầu.
-- **Tạo mã QR (QR Code)**: Hỗ trợ tạo mã QR từ chuỗi văn bản, đường dẫn URL bất kỳ.
-- **Tự động cập nhật (Debounce)**: Tự tạo mã sau 300ms dừng gõ phím.
-- **Hiển thị dạng Grid linh hoạt**: 1, 2 hoặc 3 cột tùy thuộc độ rộng cửa sổ ứng dụng.
-- **Thống kê thời gian thực**: Tổng số dòng, số mã thành công, số mã lỗi.
-- **Chi tiết & Sao chép**: Xem phóng to mã, sao chép dữ liệu chỉ bằng 1 cú click.
-- **100% Offline**: Không cần kết nối Internet, không lưu trữ dữ liệu cá nhân.
+> **Developed by HOANG VAN CONG**
 
 ---
 
-## 🛠️ Yêu cầu hệ thống & Cài đặt
+## ⚡ Tải Về Nhanh File `.exe` (Chạy Độc Lập)
 
-### Yêu cầu:
-- Windows 10/11
-- Python 3.10 trở lên (nếu chạy từ source)
+Bạn có thể tải ngay file ứng dụng thực thi duy nhất **`BarcodeGenerator.exe`** (chạy trực tiếp trên Windows không cần cài Python) tại đây:
 
-### Cài đặt thư viện:
+👉 **[Tải xuống Release v1.0.0 (BarcodeGenerator.exe)](https://github.com/Cong06/Barcode/releases/tag/v1.0.0)**
+
+---
+
+## 🌟 Tính Năng Nổi Bật
+
+- **Tạo mã vạch Code 128C chuẩn**: Xác thực chữ số chẵn (Subtype C), giữ nguyên các số 0 ở đầu.
+- **Tạo mã QR (QR Code)**: Hỗ trợ văn bản UTF-8 và đường dẫn URL bất kỳ với mức sửa lỗi `ERROR_CORRECT_M`.
+- **Giao diện Red & White Edition**: Phong cách màu Đỏ Tươi & Trắng sang trọng, sắc nét.
+- **Nút "🚀 TẠO MÃ" (Ctrl + Enter)**: Chủ động phát mã, tránh giật lag khi paste danh sách dài.
+- **Nút "🔄 Refresh"**: Xóa nhanh toàn bộ ô nhập dữ liệu chỉ bằng 1 cú nhấp.
+- **Căn giữa 100% (Row-Level Centering)**: Mã vạch và QR luôn được đặt ở **chính giữa màn hình** dù chỉ có 1 mã hay nhiều mã.
+- **Tùy chỉnh hiển thị linh hoạt**:
+  - *Kích thước mã*: 75%, 100%, 130%, 160%.
+  - *Số cột*: Tự động (Responsive) hoặc 1 Cột, 2 Cột, 3 Cột.
+  - *Bảng màu sắc*: Cổ điển, Đỏ Rực Rỡ, Navy Đậm, Xanh Emerald, Tím Violet.
+- **100% Offline & Bảo Mật**: Không cần Internet, không thu thập dữ liệu người dùng.
+
+---
+
+## 🚀 Hướng Dẫn Dành Cho Lập Trình Viên (Source Code)
+
+### Cài đặt phụ thuộc:
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-## 🚀 Hướng dẫn sử dụng
-
-### 1. Chạy ứng dụng từ mã nguồn (Source code):
+### Chạy ứng dụng từ mã nguồn:
 ```bash
 python main.py
 ```
 
-### 2. Thao tác trên giao diện:
-1. **Chọn loại mã**: Chọn **Code 128C** hoặc **QR Code** từ thanh chuyển đổi ở trên cùng.
-2. **Nhập dữ liệu**: Dán danh sách mã vào khung văn bản bên trái (Mỗi mã trên 1 dòng).
-3. **Xem kết quả**: Danh sách mã sẽ tự động xuất hiện ở lưới bên phải.
-4. **Xem chi tiết / Coppy**: Bấm **Chi tiết** trên từng ô mã để xem hình lớn hoặc bấm **Copy** để sao chép chuỗi gốc.
-
----
-
-## 📦 Đóng gói ứng dụng thành file EXE (PyInstaller)
-
-Để tạo file ứng dụng chạy độc lập `.exe` (chạy không cần cài Python):
-
+### Đóng gói file `.exe` đơn (Single File Executable):
 ```bash
-pyinstaller --noconfirm --onedir --windowed --icon="assets/icon.ico" --add-data "assets;assets" --name "BarcodeGenerator" main.py
+pyinstaller --noconfirm --onefile --windowed --icon="assets/icon.ico" --add-data "assets;assets" --name "BarcodeGenerator" main.py
 ```
-
-Sau khi hoàn tất, file thực thi sẽ nằm tại thư mục:
-`dist/BarcodeGenerator/BarcodeGenerator.exe`
+*File thực thi sẽ nằm tại `dist/BarcodeGenerator.exe`.*
 
 ---
 
-## 📁 Cấu trúc thư mục dự án
+## 📁 Cấu Trúc Dự Án
 
 ```
 d:/Barcode/
 ├── app/
 │   ├── __init__.py
-│   ├── validator.py          # Kiểm tra dữ liệu hợp lệ (Code 128C & QR)
-│   ├── barcode_generator.py  # Tạo hình ảnh Code 128C
-│   ├── qr_generator.py       # Tạo hình ảnh QR Code
-│   └── ui.py                 # Giao diện CustomTkinter
+│   ├── validator.py          # Xác thực dữ liệu Code 128C & QR Code
+│   ├── barcode_generator.py  # Tạo hình ảnh Code 128C nét cao (300 DPI)
+│   ├── qr_generator.py       # Tạo hình ảnh QR Code (ISO/IEC 18004)
+│   └── ui.py                 # Giao diện Red & White Edition (CustomTkinter)
 ├── assets/
-│   ├── icon.ico              # Icon ứng dụng (.ico)
-│   └── icon.png              # Icon ứng dụng (.png)
+│   ├── icon.ico              # Biểu tượng Windows (.ico)
+│   └── icon.png              # Biểu tượng PNG
 ├── spec/
 │   └── SPEC.md               # Đặc tả kỹ thuật chi tiết
-├── main.py                   # File khởi chạy chính
+├── main.py                   # Entry point ứng dụng
 ├── requirements.txt          # Danh sách thư viện phụ thuộc
-└── README.md                 # Hướng dẫn sử dụng & Đóng gói
+└── README.md                 # Hướng dẫn sử dụng & Tải về
 ```
