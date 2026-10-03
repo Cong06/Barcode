@@ -501,14 +501,24 @@ class App(ctk.CTk):
             else:
                 self.scroll_frame.grid_columnconfigure(c, weight=0)
 
-        # Place cards centered in grid cells
+        total_items = len(results)
+
+        # Place cards with row-level centering for incomplete rows (e.g. 1 card in 3-column mode)
         for idx, item in enumerate(results):
-            row = idx // num_cols
-            col = idx % num_cols
+            row_idx = idx // num_cols
+            col_in_row = idx % num_cols
+
+            # Count how many items are in this specific row
+            start_idx_of_row = row_idx * num_cols
+            items_in_this_row = min(num_cols, total_items - start_idx_of_row)
+
+            # Column offset to center incomplete rows (e.g. 1 card centers in column 1 of 3)
+            col_offset = (num_cols - items_in_this_row) // 2
+            col = col_in_row + col_offset
 
             card = self._create_card(self.scroll_frame, item)
-            # Center card in grid cell without stretch
-            card.grid(row=row, column=col, padx=10, pady=10)
+            card.grid(row=row_idx, column=col, padx=10, pady=10)
+
 
 
     def _get_column_count(self):
