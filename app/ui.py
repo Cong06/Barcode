@@ -301,6 +301,18 @@ class App(ctk.CTk):
         self.color_selector.set("Cổ điển")
         self.color_selector.pack(fill="x", pady=(0, 8))
 
+        # --- Section 5: Footer Credit (Bottom-Left Corner) ---
+        footer_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
+        footer_frame.pack(side="bottom", fill="x", padx=18, pady=(0, 14))
+
+        ctk.CTkLabel(
+            footer_frame,
+            text="Developed by HOANG VAN CONG",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            text_color="#991B1B",
+        ).pack(anchor="w")
+
+
     # ================================================================
     #  RIGHT PANE (RESULT GRID - RED & WHITE STYLE)
     # ================================================================
