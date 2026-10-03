@@ -169,7 +169,7 @@ class App(ctk.CTk):
         self.textbox = ctk.CTkTextbox(
             input_frame,
             height=150,
-            font=ctk.CTkFont(family="Consolas", size=13),
+            font=ctk.CTkFont(family="Segoe UI", size=13),
             border_width=1.5,
             border_color="#C7D2FE",
             fg_color="#FFFFFF",
@@ -548,7 +548,7 @@ class App(ctk.CTk):
             ctk.CTkLabel(
                 card,
                 text=text,
-                font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
+                font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
                 text_color="#1F2937",
                 anchor="center",
             ).pack(padx=14, pady=2, fill="x")
@@ -604,7 +604,7 @@ class App(ctk.CTk):
             ctk.CTkLabel(
                 card,
                 text=disp_text,
-                font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
+                font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
                 text_color="#1E1B4B",
                 anchor="center",
             ).pack(padx=14, pady=(2, 12), fill="x")
