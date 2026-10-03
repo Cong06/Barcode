@@ -494,6 +494,13 @@ class App(ctk.CTk):
         num_cols = self._get_column_count()
         self._last_cols = num_cols
 
+        # Configure column weights: set weight=1 for active columns, weight=0 for unused columns
+        for c in range(6):
+            if c < num_cols:
+                self.scroll_frame.grid_columnconfigure(c, weight=1)
+            else:
+                self.scroll_frame.grid_columnconfigure(c, weight=0)
+
         # Place cards centered in grid cells
         for idx, item in enumerate(results):
             row = idx // num_cols
@@ -503,9 +510,6 @@ class App(ctk.CTk):
             # Center card in grid cell without stretch
             card.grid(row=row, column=col, padx=10, pady=10)
 
-        # Expand grid columns evenly
-        for c in range(num_cols):
-            self.scroll_frame.grid_columnconfigure(c, weight=1)
 
     def _get_column_count(self):
         """Get column count based on setting or right pane width."""
