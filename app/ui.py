@@ -1,6 +1,6 @@
 """
 Main UI module for Barcode Generator.
-Split-pane layout with resizable input/control panel on the left and barcode grid on the right.
+Vibrant / Colorful Modern UI layout with split resizable PanedWindow.
 """
 
 import tkinter as tk
@@ -16,9 +16,9 @@ class App(ctk.CTk):
         super().__init__()
 
         # --- Window Config ---
-        self.title("Barcode Generator - Code 128C & QR Code")
-        self.geometry("1280x820")
-        self.minsize(800, 550)
+        self.title("Barcode Generator - Vibrant Modern Edition")
+        self.geometry("1280x840")
+        self.minsize(820, 580)
         ctk.set_appearance_mode("light")
 
         # --- State Variables ---
@@ -27,17 +27,19 @@ class App(ctk.CTk):
         self.grid_cols_setting = "Tự động"
         self.color_palette_name = "Cổ điển"
 
+        # Vibrant Color Palettes
         self.color_palettes = {
             "Cổ điển": {"fg": "#000000", "bg": "#FFFFFF"},
-            "Navy": {"fg": "#1E3A8A", "bg": "#FFFFFF"},
-            "Đỏ Đô": {"fg": "#991B1B", "bg": "#FFFFFF"},
-            "Xanh Lá": {"fg": "#065F46", "bg": "#FFFFFF"},
-            "Tím": {"fg": "#581C87", "bg": "#FFFFFF"},
+            "Navy Rực Rỡ": {"fg": "#1E3A8A", "bg": "#FFFFFF"},
+            "Đỏ Đô Vibrant": {"fg": "#BE123C", "bg": "#FFFFFF"},
+            "Xanh Emerald": {"fg": "#047857", "bg": "#FFFFFF"},
+            "Tím Violet": {"fg": "#6D28D9", "bg": "#FFFFFF"},
         }
 
         self._last_entries = []
         self._cached_results = []
         self._card_images = []
+        self._last_cols = None
 
         # --- Build UI Layout ---
         self._build_main_layout()
@@ -54,60 +56,70 @@ class App(ctk.CTk):
     # ================================================================
     def _build_main_layout(self):
         """Create split PanedWindow layout (Left Pane = Input & Controls, Right Pane = Grid)."""
-        # PanedWindow splitter allows dragging sash to resize left vs right side
         self.paned = tk.PanedWindow(
             self,
             orient=tk.HORIZONTAL,
             sashwidth=6,
-            bg="#CBD5E1",
+            bg="#C7D2FE",  # Soft Indigo Sash
             bd=0,
             sashrelief="flat",
         )
         self.paned.pack(fill="both", expand=True)
 
-        # Left Pane (Control & Input Panel)
+        # Left Pane (Control & Input Panel - Vibrant Light Slate)
         self.left_pane = ctk.CTkFrame(self.paned, fg_color="#F8FAFC", corner_radius=0)
-        self.paned.add(self.left_pane, minsize=320, width=400)
+        self.paned.add(self.left_pane, minsize=330, width=420)
 
-        # Right Pane (Result Grid Panel)
-        self.right_pane = ctk.CTkFrame(self.paned, fg_color="#FFFFFF", corner_radius=0)
-        self.paned.add(self.right_pane, minsize=450)
+        # Right Pane (Result Grid Panel - Soft Indigo-Tint Background)
+        self.right_pane = ctk.CTkFrame(self.paned, fg_color="#EEF2FF", corner_radius=0)
+        self.paned.add(self.right_pane, minsize=460)
 
         # Populate left & right panes
         self._build_left_pane()
         self._build_right_pane()
 
     # ================================================================
-    #  LEFT PANE (INPUT & CONTROLS)
+    #  LEFT PANE (INPUT & CONTROLS - VIBRANT MODERN STYLE)
     # ================================================================
     def _build_left_pane(self):
-        # Header title
+        # --- Header Section ---
         header_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
-        header_frame.pack(fill="x", padx=16, pady=(16, 8))
+        header_frame.pack(fill="x", padx=18, pady=(16, 6))
+
+        # Vibrant Badge
+        badge = ctk.CTkFrame(header_frame, fg_color="#E0E7FF", corner_radius=6)
+        badge.pack(anchor="w", pady=(0, 4))
+
+        ctk.CTkLabel(
+            badge,
+            text="✨ VIBRANT MODERN EDITION",
+            font=ctk.CTkFont(size=10, weight="bold"),
+            text_color="#4338CA",
+        ).pack(padx=8, pady=2)
 
         ctk.CTkLabel(
             header_frame,
             text="Barcode Generator",
-            font=ctk.CTkFont(size=22, weight="bold"),
-            text_color="#0F172A",
+            font=ctk.CTkFont(size=24, weight="bold"),
+            text_color="#1E1B4B",
         ).pack(anchor="w")
 
         ctk.CTkLabel(
             header_frame,
-            text="Tạo mã vạch Code 128C & QR Code",
+            text="Tạo mã vạch Code 128C & QR Code nét cao",
             font=ctk.CTkFont(size=12),
-            text_color="#64748B",
+            text_color="#6366F1",
         ).pack(anchor="w")
 
         # --- Section 1: Mode Selector ---
         mode_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
-        mode_frame.pack(fill="x", padx=16, pady=(8, 8))
+        mode_frame.pack(fill="x", padx=18, pady=(10, 6))
 
         ctk.CTkLabel(
             mode_frame,
-            text="Loại mã:",
+            text="🎯 Chọn loại mã:",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color="#334155",
+            text_color="#312E81",
         ).pack(anchor="w", pady=(0, 4))
 
         self.mode_selector = ctk.CTkSegmentedButton(
@@ -115,34 +127,57 @@ class App(ctk.CTk):
             values=["Code 128C", "QR Code"],
             command=self._on_mode_change,
             font=ctk.CTkFont(size=12, weight="bold"),
-            selected_color="#2563EB",
-            selected_hover_color="#1D4ED8",
+            selected_color="#4F46E5",
+            selected_hover_color="#4338CA",
+            unselected_color="#E0E7FF",
+            unselected_hover_color="#C7D2FE",
+            text_color="#1E1B4B",
         )
         self.mode_selector.set("Code 128C")
         self.mode_selector.pack(fill="x")
 
-        # --- Section 2: Input Textarea ---
+        # --- Section 2: Input Textarea + Clear Button ---
         input_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
-        input_frame.pack(fill="x", padx=16, pady=(8, 4))
+        input_frame.pack(fill="x", padx=18, pady=(8, 4))
+
+        # Title row with Clear button
+        input_title_row = ctk.CTkFrame(input_frame, fg_color="transparent")
+        input_title_row.pack(fill="x", pady=(0, 4))
 
         ctk.CTkLabel(
-            input_frame,
-            text="Nhập danh sách mã (mỗi mã 1 dòng):",
+            input_title_row,
+            text="📝 Danh sách mã (1 mã / dòng):",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color="#334155",
-        ).pack(anchor="w", pady=(0, 4))
+            text_color="#312E81",
+        ).pack(side="left")
+
+        # Quick Clear Input Button
+        self.btn_clear = ctk.CTkButton(
+            input_title_row,
+            text="🗑️ Xóa nhập",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            fg_color="#FEE2E2",
+            text_color="#DC2626",
+            hover_color="#FCA5A5",
+            width=75,
+            height=26,
+            corner_radius=6,
+            command=self._clear_input,
+        )
+        self.btn_clear.pack(side="right")
 
         self.textbox = ctk.CTkTextbox(
             input_frame,
-            height=160,
+            height=150,
             font=ctk.CTkFont(family="Consolas", size=13),
-            border_width=1,
-            border_color="#CBD5E1",
+            border_width=1.5,
+            border_color="#C7D2FE",
             fg_color="#FFFFFF",
+            corner_radius=8,
         )
         self.textbox.pack(fill="x")
 
-        # Helper & count label row
+        # Helper & line counter row
         info_row = ctk.CTkFrame(input_frame, fg_color="transparent")
         info_row.pack(fill="x", pady=(4, 0))
 
@@ -150,7 +185,7 @@ class App(ctk.CTk):
             info_row,
             text="Chỉ chứa số, số lượng chữ số chẵn",
             font=ctk.CTkFont(size=11),
-            text_color="#64748B",
+            text_color="#6366F1",
         )
         self.helper_label.pack(side="left")
 
@@ -158,59 +193,62 @@ class App(ctk.CTk):
             info_row,
             text="Số lượng: 0",
             font=ctk.CTkFont(size=11, weight="bold"),
-            text_color="#475569",
+            text_color="#4338CA",
         )
         self.count_label.pack(side="right")
 
-        # Keypress listener only updates line count (no auto-generate)
+        # Keypress listener for line count
         self.textbox.bind("<KeyRelease>", self._update_line_count)
         self.textbox.bind("<ButtonRelease>", self._update_line_count)
 
         # --- Section 3: Generate Button ---
         btn_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
-        btn_frame.pack(fill="x", padx=16, pady=(8, 12))
+        btn_frame.pack(fill="x", padx=18, pady=(8, 10))
 
         self.btn_generate = ctk.CTkButton(
             btn_frame,
-            text="🚀 Tạo Mã  (Ctrl+Enter)",
+            text="🚀 TẠO MÃ  (Ctrl+Enter)",
             font=ctk.CTkFont(size=14, weight="bold"),
-            height=42,
-            fg_color="#2563EB",
-            hover_color="#1D4ED8",
-            corner_radius=8,
+            height=44,
+            fg_color="#4F46E5",
+            hover_color="#4338CA",
+            corner_radius=10,
             command=self._trigger_generation,
         )
         self.btn_generate.pack(fill="x")
 
         # Separator line
-        ctk.CTkFrame(self.left_pane, height=1, fg_color="#E2E8F0").pack(
-            fill="x", padx=16, pady=4
+        ctk.CTkFrame(self.left_pane, height=1.5, fg_color="#E0E7FF").pack(
+            fill="x", padx=18, pady=4
         )
 
         # --- Section 4: Display Configuration Controls ---
         config_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
-        config_frame.pack(fill="x", padx=16, pady=(8, 12))
+        config_frame.pack(fill="x", padx=18, pady=(6, 12))
 
         ctk.CTkLabel(
             config_frame,
             text="⚙️ CẤU HÌNH HIỂN THỊ",
             font=ctk.CTkFont(size=12, weight="bold"),
-            text_color="#475569",
-        ).pack(anchor="w", pady=(0, 8))
+            text_color="#3730A3",
+        ).pack(anchor="w", pady=(0, 6))
 
         # 4A: Kích thước mã (Zoom scale)
         ctk.CTkLabel(
             config_frame,
             text="Kích thước mã:",
-            font=ctk.CTkFont(size=12),
-            text_color="#334155",
-        ).pack(anchor="w", pady=(4, 2))
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#4338CA",
+        ).pack(anchor="w", pady=(2, 2))
 
         self.size_selector = ctk.CTkSegmentedButton(
             config_frame,
             values=["75%", "100%", "130%", "160%"],
             command=self._on_size_change,
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(size=11, weight="bold"),
+            selected_color="#6366F1",
+            selected_hover_color="#4F46E5",
+            unselected_color="#E0E7FF",
         )
         self.size_selector.set("100%")
         self.size_selector.pack(fill="x", pady=(0, 8))
@@ -219,15 +257,18 @@ class App(ctk.CTk):
         ctk.CTkLabel(
             config_frame,
             text="Số mã trên 1 dòng (Số cột):",
-            font=ctk.CTkFont(size=12),
-            text_color="#334155",
-        ).pack(anchor="w", pady=(4, 2))
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#4338CA",
+        ).pack(anchor="w", pady=(2, 2))
 
         self.cols_selector = ctk.CTkSegmentedButton(
             config_frame,
             values=["Tự động", "1 Cột", "2 Cột", "3 Cột"],
             command=self._on_cols_change,
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(size=11, weight="bold"),
+            selected_color="#6366F1",
+            selected_hover_color="#4F46E5",
+            unselected_color="#E0E7FF",
         )
         self.cols_selector.set("Tự động")
         self.cols_selector.pack(fill="x", pady=(0, 8))
@@ -236,61 +277,63 @@ class App(ctk.CTk):
         ctk.CTkLabel(
             config_frame,
             text="Màu sắc mã:",
-            font=ctk.CTkFont(size=12),
-            text_color="#334155",
-        ).pack(anchor="w", pady=(4, 2))
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#4338CA",
+        ).pack(anchor="w", pady=(2, 2))
 
         self.color_selector = ctk.CTkOptionMenu(
             config_frame,
             values=list(self.color_palettes.keys()),
             command=self._on_color_change,
-            font=ctk.CTkFont(size=12),
+            font=ctk.CTkFont(size=12, weight="bold"),
             dropdown_font=ctk.CTkFont(size=12),
-            fg_color="#0F172A",
-            button_color="#1E293B",
-            button_hover_color="#334155",
+            fg_color="#312E81",
+            button_color="#4338CA",
+            button_hover_color="#4F46E5",
         )
         self.color_selector.set("Cổ điển")
         self.color_selector.pack(fill="x", pady=(0, 8))
 
     # ================================================================
-    #  RIGHT PANE (RESULT GRID)
+    #  RIGHT PANE (RESULT GRID - VIBRANT MODERN STYLE)
     # ================================================================
     def _build_right_pane(self):
-        # Stats bar container
-        stats_container = ctk.CTkFrame(self.right_pane, fg_color="#F8FAFC", height=40)
-        stats_container.pack(fill="x", side="top", padx=12, pady=(12, 0))
+        # Stats bar container with vibrant gradient styling
+        stats_container = ctk.CTkFrame(
+            self.right_pane, fg_color="#FFFFFF", corner_radius=10, border_width=1, border_color="#C7D2FE"
+        )
+        stats_container.pack(fill="x", side="top", padx=14, pady=(14, 4))
 
         self.stats_label = ctk.CTkLabel(
             stats_container,
-            text="Nhập dữ liệu và nhấn 'Tạo Mã' để bắt đầu",
+            text="✨ Nhập dữ liệu và nhấn 'Tạo Mã' để bắt đầu",
             font=ctk.CTkFont(size=13, weight="bold"),
-            text_color="#475569",
+            text_color="#4338CA",
         )
-        self.stats_label.pack(side="left", padx=12, pady=6)
+        self.stats_label.pack(side="left", padx=14, pady=8)
 
         # Empty State frame
         self.empty_frame = ctk.CTkFrame(self.right_pane, fg_color="transparent")
-        self.empty_frame.pack(fill="both", expand=True, pady=80)
+        self.empty_frame.pack(fill="both", expand=True, pady=100)
 
         ctk.CTkLabel(
             self.empty_frame,
-            text="📋",
-            font=ctk.CTkFont(size=48),
+            text="🎨",
+            font=ctk.CTkFont(size=56),
         ).pack()
 
         ctk.CTkLabel(
             self.empty_frame,
-            text="Chưa có mã nào được tạo",
-            font=ctk.CTkFont(size=16, weight="bold"),
-            text_color="#64748B",
-        ).pack(pady=(8, 4))
+            text="Chưa Có Mã Nào Được Tạo",
+            font=ctk.CTkFont(size=17, weight="bold"),
+            text_color="#3730A3",
+        ).pack(pady=(10, 4))
 
         ctk.CTkLabel(
             self.empty_frame,
-            text="Dán danh sách mã vào ô bên trái và bấm nút 'Tạo Mã'",
+            text="Dán danh sách mã vào khung bên trái và nhấn nút '🚀 TẠO MÃ'",
             font=ctk.CTkFont(size=13),
-            text_color="#94A3B8",
+            text_color="#6366F1",
         ).pack()
 
         # Scrollable grid frame
@@ -298,11 +341,17 @@ class App(ctk.CTk):
             self.right_pane,
             fg_color="transparent",
         )
-        # Hidden by default until data is rendered
 
     # ================================================================
     #  EVENT HANDLERS & CONTROL CALLBACKS
     # ================================================================
+    def _clear_input(self):
+        """Clear textbox, reset count, and restore empty state."""
+        self.textbox.delete("1.0", "end")
+        self._last_entries.clear()
+        self._update_line_count()
+        self._show_empty_state()
+
     def _update_line_count(self, event=None):
         """Update live line counter without triggering code generation."""
         raw_text = self.textbox.get("1.0", "end-1c")
@@ -316,7 +365,6 @@ class App(ctk.CTk):
         else:
             self.helper_label.configure(text="Chấp nhận mọi văn bản / URL")
 
-        # If data was already generated, re-trigger code generation for new mode
         if self._last_entries:
             self._trigger_generation()
 
@@ -324,21 +372,18 @@ class App(ctk.CTk):
         scale_map = {"75%": 0.75, "100%": 1.0, "130%": 1.3, "160%": 1.6}
         self.scale_factor = scale_map.get(value, 1.0)
 
-        # Re-render grid using cached results
         if self._cached_results:
             self._render_grid(self._cached_results)
 
     def _on_cols_change(self, value):
         self.grid_cols_setting = value
 
-        # Re-render grid using cached results
         if self._cached_results:
             self._render_grid(self._cached_results)
 
     def _on_color_change(self, value):
         self.color_palette_name = value
 
-        # Color changes require re-generating image pixels
         if self._last_entries:
             self._trigger_generation()
 
@@ -375,7 +420,6 @@ class App(ctk.CTk):
             is_valid, error_msg = validate(original_text, self.current_mode)
 
             if is_valid:
-                # Generate barcode or QR code with selected colors
                 if self.current_mode == "Code 128C":
                     img = generate_code128c(
                         original_text, fg_color=fg_color, bg_color=bg_color
@@ -415,9 +459,9 @@ class App(ctk.CTk):
         self._render_grid(results)
 
     def _show_empty_state(self):
-        self.stats_label.configure(text="Nhập dữ liệu và nhấn 'Tạo Mã' để bắt đầu")
+        self.stats_label.configure(text="✨ Nhập dữ liệu và nhấn 'Tạo Mã' để bắt đầu")
         self.scroll_frame.pack_forget()
-        self.empty_frame.pack(fill="both", expand=True, pady=80)
+        self.empty_frame.pack(fill="both", expand=True, pady=100)
         self._cached_results.clear()
 
     def _update_stats(self, total, valid, errors):
@@ -427,12 +471,12 @@ class App(ctk.CTk):
         self.stats_label.configure(text="   |   ".join(parts))
 
     # ================================================================
-    #  GRID RENDERING & CARD CREATION
+    #  GRID RENDERING & PERFECT CENTER CARD CREATION
     # ================================================================
     def _render_grid(self, results):
-        """Render all barcode/QR cards into grid."""
+        """Render all barcode/QR cards into grid with perfect centering."""
         self.empty_frame.pack_forget()
-        self.scroll_frame.pack(fill="both", expand=True, padx=12, pady=12)
+        self.scroll_frame.pack(fill="both", expand=True, padx=12, pady=10)
 
         # Clear old widgets
         for widget in self.scroll_frame.winfo_children():
@@ -443,15 +487,16 @@ class App(ctk.CTk):
         num_cols = self._get_column_count()
         self._last_cols = num_cols
 
-        # Place cards in grid
+        # Place cards centered in grid cells
         for idx, item in enumerate(results):
             row = idx // num_cols
             col = idx % num_cols
 
             card = self._create_card(self.scroll_frame, item)
-            card.grid(row=row, column=col, padx=8, pady=8, sticky="n")
+            # Center card in grid cell without stretch
+            card.grid(row=row, column=col, padx=10, pady=10)
 
-        # Expand columns evenly
+        # Expand grid columns evenly
         for c in range(num_cols):
             self.scroll_frame.grid_columnconfigure(c, weight=1)
 
@@ -464,30 +509,29 @@ class App(ctk.CTk):
         elif self.grid_cols_setting == "3 Cột":
             return 3
         else:
-            # Auto responsive mode based on right pane width
             width = self.right_pane.winfo_width()
-            if width >= 900:
+            if width >= 920:
                 return 3
-            elif width >= 600:
+            elif width >= 620:
                 return 2
             else:
                 return 1
 
     def _create_card(self, parent, item):
-        """Create an individual card widget."""
+        """Create an individual card widget with 100% PERFECT CENTER alignment."""
         text = item["text"]
         image = item["image"]
         is_error = item["is_error"]
         error_msg = item["error_msg"]
 
         # Base card width adjusted by scale factor
-        card_width = int(300 * self.scale_factor)
+        card_width = int(310 * self.scale_factor)
 
         if is_error:
             card = ctk.CTkFrame(
                 parent,
-                corner_radius=10,
-                border_width=1,
+                corner_radius=12,
+                border_width=1.5,
                 border_color="#F59E0B",
                 fg_color="#FEF3C7",
                 width=card_width,
@@ -498,30 +542,33 @@ class App(ctk.CTk):
                 text="⚠ Không hợp lệ",
                 font=ctk.CTkFont(size=12, weight="bold"),
                 text_color="#B45309",
-            ).pack(padx=14, pady=(10, 2), anchor="w")
+                anchor="center",
+            ).pack(padx=14, pady=(12, 2), fill="x")
 
             ctk.CTkLabel(
                 card,
                 text=text,
                 font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
                 text_color="#1F2937",
-            ).pack(padx=14, pady=2)
+                anchor="center",
+            ).pack(padx=14, pady=2, fill="x")
 
             ctk.CTkLabel(
                 card,
                 text=error_msg,
                 font=ctk.CTkFont(size=11),
                 text_color="#92400E",
-                wraplength=max(card_width - 30, 150),
-                justify="left",
-            ).pack(padx=14, pady=(0, 10), anchor="w")
+                wraplength=max(card_width - 30, 160),
+                justify="center",
+                anchor="center",
+            ).pack(padx=14, pady=(0, 12), fill="x")
 
         else:
             card = ctk.CTkFrame(
                 parent,
-                corner_radius=10,
-                border_width=1,
-                border_color="#E2E8F0",
+                corner_radius=12,
+                border_width=1.5,
+                border_color="#C7D2FE",
                 fg_color="#FFFFFF",
                 width=card_width,
             )
@@ -544,19 +591,23 @@ class App(ctk.CTk):
                 )
                 self._card_images.append(ctk_img)
 
-                # Render barcode/QR image
-                ctk.CTkLabel(card, image=ctk_img, text="").pack(
-                    padx=14, pady=(12, 4)
-                )
+                # Render barcode/QR image inside transparent centered container
+                img_container = ctk.CTkFrame(card, fg_color="transparent")
+                img_container.pack(fill="x", padx=14, pady=(14, 6))
 
-            # Text label below barcode
+                ctk.CTkLabel(
+                    img_container, image=ctk_img, text="", anchor="center"
+                ).pack(anchor="center")
+
+            # Centered Text label below barcode
             disp_text = text if len(text) <= 38 else text[:35] + "..."
             ctk.CTkLabel(
                 card,
                 text=disp_text,
-                font=ctk.CTkFont(family="Consolas", size=12, weight="bold"),
-                text_color="#1E293B",
-            ).pack(padx=14, pady=(2, 8))
+                font=ctk.CTkFont(family="Consolas", size=13, weight="bold"),
+                text_color="#1E1B4B",
+                anchor="center",
+            ).pack(padx=14, pady=(2, 12), fill="x")
 
         return card
 
@@ -565,7 +616,6 @@ class App(ctk.CTk):
     # ================================================================
     def _on_window_configure(self, event=None):
         """Auto re-layout grid on window resize if column count changes."""
-        # ONLY handle main window configure events, ignore child widget configure events
         if event and event.widget != self:
             return
 
@@ -573,4 +623,3 @@ class App(ctk.CTk):
             new_cols = self._get_column_count()
             if getattr(self, "_last_cols", None) != new_cols:
                 self._render_grid(self._cached_results)
-
