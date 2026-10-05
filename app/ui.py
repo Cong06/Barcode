@@ -148,7 +148,7 @@ class App(ctk.CTk):
 
         ctk.CTkLabel(
             input_title_row,
-            text="📝 Danh sách mã (dòng, phẩy, ;, cách):",
+            text="📝 Danh sách mã:",
             font=ctk.CTkFont(size=13, weight="bold"),
             text_color="#991B1B",
         ).pack(side="left")
