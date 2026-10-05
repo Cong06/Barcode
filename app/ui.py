@@ -3,12 +3,14 @@ Main UI module for Barcode Generator.
 Red & White Modern Edition layout with split resizable PanedWindow.
 """
 
+import re
 import tkinter as tk
 import customtkinter as ctk
 from PIL import Image, ImageTk
 from app.validator import validate
 from app.barcode_generator import generate_code128c
 from app.qr_generator import generate_qrcode
+
 
 
 class App(ctk.CTk):
@@ -146,7 +148,7 @@ class App(ctk.CTk):
 
         ctk.CTkLabel(
             input_title_row,
-            text="📝 Danh sách mã (1 mã / dòng):",
+            text="📝 Danh sách mã (dòng, phẩy, ;, cách):",
             font=ctk.CTkFont(size=13, weight="bold"),
             text_color="#991B1B",
         ).pack(side="left")
@@ -371,11 +373,21 @@ class App(ctk.CTk):
         self._update_line_count()
         self._show_empty_state()
 
+    def _parse_entries(self, raw_text: str) -> list[str]:
+        """
+        Extract code entries from raw input text.
+        Supports splitting by newlines, blank lines, commas (,), semicolons (;), and spaces/tabs.
+        """
+        if not raw_text:
+            return []
+        raw_tokens = re.split(r'[\n\r,;\t ]+', raw_text)
+        return [token.strip() for token in raw_tokens if token.strip()]
+
     def _update_line_count(self, event=None):
-        """Update live line counter without triggering code generation."""
+        """Update live entry counter without triggering code generation."""
         raw_text = self.textbox.get("1.0", "end-1c")
-        lines = [line for line in raw_text.split("\n") if line.strip()]
-        self.count_label.configure(text=f"Số lượng: {len(lines)}")
+        entries = self._parse_entries(raw_text)
+        self.count_label.configure(text=f"Số lượng: {len(entries)}")
 
     def _on_mode_change(self, value):
         self.current_mode = value
@@ -412,10 +424,7 @@ class App(ctk.CTk):
     def _trigger_generation(self):
         """Read input textbox, validate, generate images, render grid."""
         raw_text = self.textbox.get("1.0", "end-1c")
-
-        # Extract non-empty lines
-        lines = raw_text.split("\n")
-        entries = [line.strip() for line in lines if line.strip()]
+        entries = self._parse_entries(raw_text)
 
         self._last_entries = entries
         self.count_label.configure(text=f"Số lượng: {len(entries)}")
