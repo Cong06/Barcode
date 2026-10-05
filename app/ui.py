@@ -697,10 +697,10 @@ class App(ctk.CTk):
 
     def _build_spotlight_modal(self):
         """Build full-screen dark backdrop overlay and spotlight dialog box."""
-        # Backdrop overlay covering entire app window
+        # Soft frosted backdrop overlay covering entire app window (mờ đục nhẹ)
         self.lightbox_overlay = ctk.CTkFrame(
             self,
-            fg_color="#0F172A",
+            fg_color="#64748B",
             corner_radius=0,
         )
         self.lightbox_overlay.place(x=0, y=0, relwidth=1, relheight=1)
