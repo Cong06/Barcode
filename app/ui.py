@@ -708,6 +708,12 @@ class App(ctk.CTk):
         # Dimmed backdrop click closes modal
         self.lightbox_overlay.bind("<Button-1>", lambda e: self._close_spotlight())
 
+        # Determine mode-dependent initial dialog size
+        if self.current_mode == "Code 128C":
+            init_w, init_h = 560, 480
+        else:
+            init_w, init_h = 480, 520
+
         # Spotlight Modal Container
         self.spotlight_dialog = ctk.CTkFrame(
             self.lightbox_overlay,
@@ -715,8 +721,8 @@ class App(ctk.CTk):
             corner_radius=18,
             border_width=2,
             border_color="#FCA5A5",
-            width=540,
-            height=460,
+            width=init_w,
+            height=init_h,
         )
         self.spotlight_dialog.place(relx=0.5, rely=0.5, anchor="center")
         self.spotlight_dialog.pack_propagate(False)
@@ -726,7 +732,7 @@ class App(ctk.CTk):
 
         # --- Modal Header ---
         header = ctk.CTkFrame(self.spotlight_dialog, fg_color="transparent")
-        header.pack(fill="x", padx=24, pady=(18, 8))
+        header.pack(fill="x", padx=20, pady=(14, 6))
 
         badge = ctk.CTkFrame(header, fg_color="#FEE2E2", corner_radius=6)
         badge.pack(side="left")
@@ -744,7 +750,7 @@ class App(ctk.CTk):
             font=ctk.CTkFont(size=12, weight="bold"),
             text_color="#64748B",
         )
-        self.spotlight_counter_lbl.pack(side="left", padx=12)
+        self.spotlight_counter_lbl.pack(side="left", padx=10)
 
         btn_close = ctk.CTkButton(
             header,
@@ -764,29 +770,33 @@ class App(ctk.CTk):
 
         # Divider
         ctk.CTkFrame(self.spotlight_dialog, height=1, fg_color="#FECDD3").pack(
-            fill="x", padx=24, pady=2
+            fill="x", padx=20, pady=2
         )
 
         # --- Image Display Container ---
         self.spotlight_img_container = ctk.CTkFrame(
-            self.spotlight_dialog, fg_color="#FFF1F2", corner_radius=12
+            self.spotlight_dialog,
+            fg_color="#F8FAFC",
+            border_color="#E2E8F0",
+            border_width=1,
+            corner_radius=12,
         )
-        self.spotlight_img_container.pack(fill="both", expand=True, padx=24, pady=14)
+        self.spotlight_img_container.pack(fill="both", expand=True, padx=20, pady=(8, 8))
 
         self.spotlight_img_label = ctk.CTkLabel(
             self.spotlight_img_container, text="", anchor="center"
         )
-        self.spotlight_img_label.pack(expand=True)
+        self.spotlight_img_label.pack(expand=True, padx=10, pady=10)
 
         # --- Code Text & Format Label ---
         self.spotlight_text_lbl = ctk.CTkLabel(
             self.spotlight_dialog,
             text="",
-            font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"),
+            font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"),
             text_color="#991B1B",
             anchor="center",
         )
-        self.spotlight_text_lbl.pack(padx=24, pady=(0, 2))
+        self.spotlight_text_lbl.pack(padx=20, pady=(4, 1))
 
         self.spotlight_format_lbl = ctk.CTkLabel(
             self.spotlight_dialog,
@@ -794,11 +804,11 @@ class App(ctk.CTk):
             font=ctk.CTkFont(size=11),
             text_color="#DC2626",
         )
-        self.spotlight_format_lbl.pack(padx=24, pady=(0, 10))
+        self.spotlight_format_lbl.pack(padx=20, pady=(0, 8))
 
         # --- Navigation Footer ---
         footer = ctk.CTkFrame(self.spotlight_dialog, fg_color="transparent")
-        footer.pack(fill="x", padx=24, pady=(0, 18))
+        footer.pack(fill="x", padx=20, pady=(4, 16))
 
         self.btn_spotlight_prev = ctk.CTkButton(
             footer,
@@ -835,12 +845,12 @@ class App(ctk.CTk):
         img = item["image"]
         if img:
             if self.current_mode == "Code 128C":
-                target_w = 440
+                target_w = 420
                 ratio = target_w / img.width
                 target_h = max(int(img.height * ratio), 90)
                 display_img = img.resize((target_w, target_h), Image.NEAREST)
             else:
-                target_size = 280
+                target_size = 250
                 display_img = img.resize((target_size, target_size), Image.NEAREST)
 
             ctk_img = ctk.CTkImage(
@@ -889,10 +899,18 @@ class App(ctk.CTk):
 
     def _animate_spotlight_open(self):
         """Smooth popup animation for spotlight modal."""
+        if self.current_mode == "Code 128C":
+            final_w, final_h = 560, 480
+        else:
+            final_w, final_h = 480, 520
+
+        start_w, start_h = int(final_w * 0.85), int(final_h * 0.85)
+        mid_w, mid_h = int(final_w * 0.93), int(final_h * 0.93)
+
         sizes = [
-            (460, 390),
-            (500, 430),
-            (540, 460),
+            (start_w, start_h),
+            (mid_w, mid_h),
+            (final_w, final_h),
         ]
 
         def step(idx):
@@ -904,7 +922,7 @@ class App(ctk.CTk):
             ):
                 w, h = sizes[idx]
                 self.spotlight_dialog.configure(width=w, height=h)
-                self.after(30, lambda: step(idx + 1))
+                self.after(25, lambda: step(idx + 1))
 
         step(0)
 
