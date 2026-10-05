@@ -43,6 +43,11 @@ class App(ctk.CTk):
         self._card_images = []
         self._last_cols = None
 
+        # --- Spotlight State Variables ---
+        self._spotlight_index = -1
+        self._spotlight_valid_items = []
+        self.lightbox_overlay = None
+
         # --- Build UI Layout ---
         self._build_main_layout()
 
@@ -487,6 +492,7 @@ class App(ctk.CTk):
         self._render_grid(results)
 
     def _show_empty_state(self):
+        self._close_spotlight()
         self.stats_label.configure(text="✨ Nhập dữ liệu và nhấn 'Tạo Mã' để bắt đầu")
         self.scroll_frame.pack_forget()
         self.empty_frame.pack(fill="both", expand=True, pady=100)
@@ -651,7 +657,285 @@ class App(ctk.CTk):
                 anchor="center",
             ).pack(padx=14, pady=(2, 12), fill="x")
 
+            # Bind click handler for Lightbox Spotlight modal
+            self._bind_card_click(card, item)
+
         return card
+
+    # ================================================================
+    #  LIGHTBOX SPOTLIGHT FEATURE
+    # ================================================================
+    def _bind_card_click(self, widget, item):
+        """Recursively bind click event and hand pointer to valid card and child widgets."""
+        try:
+            widget.configure(cursor="hand2")
+        except Exception:
+            pass
+        widget.bind("<Button-1>", lambda e: self._open_spotlight(item))
+        for child in widget.winfo_children():
+            self._bind_card_click(child, item)
+
+    def _open_spotlight(self, item):
+        """Open the Lightbox Spotlight modal for the clicked valid item."""
+        self._spotlight_valid_items = [
+            it for it in self._cached_results if not it["is_error"] and it["image"] is not None
+        ]
+        if not self._spotlight_valid_items or item not in self._spotlight_valid_items:
+            return
+
+        self._spotlight_index = self._spotlight_valid_items.index(item)
+
+        # Bind keyboard navigation
+        self.bind("<Escape>", self._on_spotlight_esc)
+        self.bind("<Left>", self._on_spotlight_left)
+        self.bind("<Right>", self._on_spotlight_right)
+
+        if self.lightbox_overlay is None or not self.lightbox_overlay.winfo_exists():
+            self._build_spotlight_modal()
+
+        self._update_spotlight_content(animated=True)
+
+    def _build_spotlight_modal(self):
+        """Build full-screen dark backdrop overlay and spotlight dialog box."""
+        # Backdrop overlay covering entire app window
+        self.lightbox_overlay = ctk.CTkFrame(
+            self,
+            fg_color="#0F172A",
+            corner_radius=0,
+        )
+        self.lightbox_overlay.place(x=0, y=0, relwidth=1, relheight=1)
+
+        # Dimmed backdrop click closes modal
+        self.lightbox_overlay.bind("<Button-1>", lambda e: self._close_spotlight())
+
+        # Spotlight Modal Container
+        self.spotlight_dialog = ctk.CTkFrame(
+            self.lightbox_overlay,
+            fg_color="#FFFFFF",
+            corner_radius=18,
+            border_width=2,
+            border_color="#FCA5A5",
+            width=540,
+            height=460,
+        )
+        self.spotlight_dialog.place(relx=0.5, rely=0.5, anchor="center")
+        self.spotlight_dialog.pack_propagate(False)
+
+        # Prevent click on dialog from closing backdrop
+        self.spotlight_dialog.bind("<Button-1>", lambda e: "break")
+
+        # --- Modal Header ---
+        header = ctk.CTkFrame(self.spotlight_dialog, fg_color="transparent")
+        header.pack(fill="x", padx=24, pady=(18, 8))
+
+        badge = ctk.CTkFrame(header, fg_color="#FEE2E2", corner_radius=6)
+        badge.pack(side="left")
+
+        ctk.CTkLabel(
+            badge,
+            text="🔍 XEM NỔI BẬT",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            text_color="#991B1B",
+        ).pack(padx=10, pady=3)
+
+        self.spotlight_counter_lbl = ctk.CTkLabel(
+            header,
+            text="(1 / 1)",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#64748B",
+        )
+        self.spotlight_counter_lbl.pack(side="left", padx=12)
+
+        btn_close = ctk.CTkButton(
+            header,
+            text="✖ Đóng",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            fg_color="#FEF2F2",
+            text_color="#DC2626",
+            hover_color="#FEE2E2",
+            border_color="#FCA5A5",
+            border_width=1,
+            width=75,
+            height=30,
+            corner_radius=8,
+            command=self._close_spotlight,
+        )
+        btn_close.pack(side="right")
+
+        # Divider
+        ctk.CTkFrame(self.spotlight_dialog, height=1, fg_color="#FECDD3").pack(
+            fill="x", padx=24, pady=2
+        )
+
+        # --- Image Display Container ---
+        self.spotlight_img_container = ctk.CTkFrame(
+            self.spotlight_dialog, fg_color="#FFF1F2", corner_radius=12
+        )
+        self.spotlight_img_container.pack(fill="both", expand=True, padx=24, pady=14)
+
+        self.spotlight_img_label = ctk.CTkLabel(
+            self.spotlight_img_container, text="", anchor="center"
+        )
+        self.spotlight_img_label.pack(expand=True)
+
+        # --- Code Text & Format Label ---
+        self.spotlight_text_lbl = ctk.CTkLabel(
+            self.spotlight_dialog,
+            text="",
+            font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"),
+            text_color="#991B1B",
+            anchor="center",
+        )
+        self.spotlight_text_lbl.pack(padx=24, pady=(0, 2))
+
+        self.spotlight_format_lbl = ctk.CTkLabel(
+            self.spotlight_dialog,
+            text="",
+            font=ctk.CTkFont(size=11),
+            text_color="#DC2626",
+        )
+        self.spotlight_format_lbl.pack(padx=24, pady=(0, 10))
+
+        # --- Navigation Footer ---
+        footer = ctk.CTkFrame(self.spotlight_dialog, fg_color="transparent")
+        footer.pack(fill="x", padx=24, pady=(0, 18))
+
+        self.btn_spotlight_prev = ctk.CTkButton(
+            footer,
+            text="◀ Mã trước",
+            font=ctk.CTkFont(size=13, weight="bold"),
+            height=38,
+            corner_radius=8,
+            command=self._spotlight_prev,
+        )
+        self.btn_spotlight_prev.pack(side="left", expand=True, fill="x", padx=(0, 6))
+
+        self.btn_spotlight_next = ctk.CTkButton(
+            footer,
+            text="Mã tiếp ▶",
+            font=ctk.CTkFont(size=13, weight="bold"),
+            height=38,
+            corner_radius=8,
+            command=self._spotlight_next,
+        )
+        self.btn_spotlight_next.pack(side="right", expand=True, fill="x", padx=(6, 0))
+
+    def _update_spotlight_content(self, animated=False):
+        """Update modal content with high-res zoomed image and counter."""
+        if not self._spotlight_valid_items or self._spotlight_index < 0:
+            return
+
+        total = len(self._spotlight_valid_items)
+        item = self._spotlight_valid_items[self._spotlight_index]
+
+        # Update counter badge
+        self.spotlight_counter_lbl.configure(text=f"({self._spotlight_index + 1} / {total})")
+
+        # High-resolution rescaled image
+        img = item["image"]
+        if img:
+            if self.current_mode == "Code 128C":
+                target_w = 440
+                ratio = target_w / img.width
+                target_h = max(int(img.height * ratio), 90)
+                display_img = img.resize((target_w, target_h), Image.NEAREST)
+            else:
+                target_size = 280
+                display_img = img.resize((target_size, target_size), Image.NEAREST)
+
+            ctk_img = ctk.CTkImage(
+                light_image=display_img,
+                dark_image=display_img,
+                size=(display_img.width, display_img.height),
+            )
+            self._spotlight_keep_img = ctk_img
+            self.spotlight_img_label.configure(image=ctk_img)
+
+        # Update text labels
+        self.spotlight_text_lbl.configure(text=item["text"])
+        self.spotlight_format_lbl.configure(text=f"Định dạng: {self.current_mode}")
+
+        # Update button states (Disabled on boundary ends)
+        if self._spotlight_index == 0:
+            self.btn_spotlight_prev.configure(
+                state="disabled",
+                fg_color="#F1F5F9",
+                text_color="#94A3B8",
+            )
+        else:
+            self.btn_spotlight_prev.configure(
+                state="normal",
+                fg_color="#DC2626",
+                text_color="#FFFFFF",
+                hover_color="#B91C1C",
+            )
+
+        if self._spotlight_index == total - 1:
+            self.btn_spotlight_next.configure(
+                state="disabled",
+                fg_color="#F1F5F9",
+                text_color="#94A3B8",
+            )
+        else:
+            self.btn_spotlight_next.configure(
+                state="normal",
+                fg_color="#DC2626",
+                text_color="#FFFFFF",
+                hover_color="#B91C1C",
+            )
+
+        if animated:
+            self._animate_spotlight_open()
+
+    def _animate_spotlight_open(self):
+        """Smooth popup animation for spotlight modal."""
+        sizes = [
+            (460, 390),
+            (500, 430),
+            (540, 460),
+        ]
+
+        def step(idx):
+            if (
+                idx < len(sizes)
+                and hasattr(self, "spotlight_dialog")
+                and self.spotlight_dialog
+                and self.spotlight_dialog.winfo_exists()
+            ):
+                w, h = sizes[idx]
+                self.spotlight_dialog.configure(width=w, height=h)
+                self.after(30, lambda: step(idx + 1))
+
+        step(0)
+
+    def _spotlight_prev(self):
+        if self._spotlight_index > 0:
+            self._spotlight_index -= 1
+            self._update_spotlight_content(animated=False)
+
+    def _spotlight_next(self):
+        if self._spotlight_index < len(self._spotlight_valid_items) - 1:
+            self._spotlight_index += 1
+            self._update_spotlight_content(animated=False)
+
+    def _on_spotlight_esc(self, event=None):
+        self._close_spotlight()
+
+    def _on_spotlight_left(self, event=None):
+        self._spotlight_prev()
+
+    def _on_spotlight_right(self, event=None):
+        self._spotlight_next()
+
+    def _close_spotlight(self):
+        """Destroy overlay and unbind spotlight shortcut keys."""
+        if hasattr(self, "lightbox_overlay") and self.lightbox_overlay and self.lightbox_overlay.winfo_exists():
+            self.lightbox_overlay.destroy()
+            self.lightbox_overlay = None
+
+        self.unbind("<Escape>")
+        self.unbind("<Left>")
+        self.unbind("<Right>")
 
     # ================================================================
     #  RESIZE LISTENER
