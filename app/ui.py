@@ -53,6 +53,8 @@ class App(ctk.CTk):
         self._spotlight_index = -1
         self._spotlight_valid_items = []
         self.lightbox_overlay = None
+        self._is_closing_spotlight = False
+        self._resize_timer = None
 
         # --- Build UI Layout ---
         self._build_main_layout()
@@ -984,33 +986,39 @@ class App(ctk.CTk):
         if animated:
             self._animate_spotlight_open()
 
+    @staticmethod
+    def _ease_out_cubic(t: float) -> float:
+        """Ease-out cubic interpolation: f(t) = 1 - (1 - t)^3 for 0 <= t <= 1."""
+        t = max(0.0, min(1.0, t))
+        return 1.0 - (1.0 - t) ** 3
+
     def _animate_spotlight_open(self):
-        """Smooth popup animation for spotlight modal."""
+        """Smooth 60 FPS Ease-Out Cubic popup animation for spotlight modal."""
+        if not hasattr(self, "spotlight_dialog") or not self.spotlight_dialog or not self.spotlight_dialog.winfo_exists():
+            return
+
         if self.current_mode != "QR Code":
             final_w, final_h = 560, 480
         else:
             final_w, final_h = 480, 520
 
-        start_w, start_h = int(final_w * 0.85), int(final_h * 0.85)
-        mid_w, mid_h = int(final_w * 0.93), int(final_h * 0.93)
+        start_w, start_h = int(final_w * 0.80), int(final_h * 0.80)
+        total_steps = 14  # ~220ms at 16ms interval (60 FPS)
 
-        sizes = [
-            (start_w, start_h),
-            (mid_w, mid_h),
-            (final_w, final_h),
-        ]
-
-        def step(idx):
+        def step(current_step):
             if (
-                idx < len(sizes)
+                current_step <= total_steps
                 and hasattr(self, "spotlight_dialog")
                 and self.spotlight_dialog
                 and self.spotlight_dialog.winfo_exists()
             ):
-                w, h = sizes[idx]
+                t = current_step / total_steps
+                factor = self._ease_out_cubic(t)
+                w = int(start_w + (final_w - start_w) * factor)
+                h = int(start_h + (final_h - start_h) * factor)
                 self.spotlight_dialog.configure(width=w, height=h)
-                if idx + 1 < len(sizes):
-                    self.after(20, lambda: step(idx + 1))
+                if current_step < total_steps:
+                    self.after(16, lambda: step(current_step + 1))
 
         step(0)
 
@@ -1018,11 +1026,35 @@ class App(ctk.CTk):
         if self._spotlight_index > 0:
             self._spotlight_index -= 1
             self._update_spotlight_content(animated=False)
+            self._animate_spotlight_transition(direction=-1)
 
     def _spotlight_next(self):
         if self._spotlight_index < len(self._spotlight_valid_items) - 1:
             self._spotlight_index += 1
             self._update_spotlight_content(animated=False)
+            self._animate_spotlight_transition(direction=1)
+
+    def _animate_spotlight_transition(self, direction=1):
+        """Smooth slide transition for spotlight content when navigating."""
+        if not hasattr(self, "spotlight_img_container") or not self.spotlight_img_container or not self.spotlight_img_container.winfo_exists():
+            return
+
+        offset_start = 18 if direction > 0 else -18
+        steps = 6
+
+        def step(i):
+            if i <= steps and hasattr(self, "spotlight_img_container") and self.spotlight_img_container and self.spotlight_img_container.winfo_exists():
+                t = i / steps
+                current_offset = int(offset_start * (1.0 - self._ease_out_cubic(t)))
+                left_pad = max(20 + current_offset, 4)
+                right_pad = max(20 - current_offset, 4)
+                self.spotlight_img_container.pack_configure(padx=(left_pad, right_pad))
+                if i < steps:
+                    self.after(16, lambda: step(i + 1))
+                else:
+                    self.spotlight_img_container.pack_configure(padx=20)
+
+        step(0)
 
     def _on_spotlight_esc(self, event=None):
         self._close_spotlight()
@@ -1034,24 +1066,71 @@ class App(ctk.CTk):
         self._spotlight_next()
 
     def _close_spotlight(self):
-        """Destroy overlay and unbind spotlight shortcut keys."""
-        if hasattr(self, "lightbox_overlay") and self.lightbox_overlay and self.lightbox_overlay.winfo_exists():
-            self.lightbox_overlay.destroy()
-            self.lightbox_overlay = None
+        """Smooth shrink & close animation for spotlight modal."""
+        if getattr(self, "_is_closing_spotlight", False):
+            return
 
+        # Unbind shortcut keys immediately
         self.unbind("<Escape>")
         self.unbind("<Left>")
         self.unbind("<Right>")
+
+        if not hasattr(self, "lightbox_overlay") or not self.lightbox_overlay or not self.lightbox_overlay.winfo_exists():
+            return
+
+        self._is_closing_spotlight = True
+
+        if hasattr(self, "spotlight_dialog") and self.spotlight_dialog and self.spotlight_dialog.winfo_exists():
+            cur_w = self.spotlight_dialog.winfo_width()
+            cur_h = self.spotlight_dialog.winfo_height()
+            target_w = int(cur_w * 0.82)
+            target_h = int(cur_h * 0.82)
+            total_steps = 9  # ~140ms at 16ms interval
+
+            def step(current_step):
+                if current_step <= total_steps and hasattr(self, "spotlight_dialog") and self.spotlight_dialog and self.spotlight_dialog.winfo_exists():
+                    t = current_step / total_steps
+                    factor = 1.0 - self._ease_out_cubic(t)  # Ease in shrink
+                    w = int(target_w + (cur_w - target_w) * factor)
+                    h = int(target_h + (cur_h - target_h) * factor)
+                    self.spotlight_dialog.configure(width=w, height=h)
+                    if current_step < total_steps:
+                        self.after(16, lambda: step(current_step + 1))
+                    else:
+                        self._finish_close_spotlight()
+                else:
+                    self._finish_close_spotlight()
+
+            step(0)
+        else:
+            self._finish_close_spotlight()
+
+    def _finish_close_spotlight(self):
+        """Destroy overlay and reset closing state."""
+        if hasattr(self, "lightbox_overlay") and self.lightbox_overlay and self.lightbox_overlay.winfo_exists():
+            self.lightbox_overlay.destroy()
+            self.lightbox_overlay = None
+        self._is_closing_spotlight = False
 
     # ================================================================
     #  RESIZE LISTENER
     # ================================================================
     def _on_window_configure(self, event=None):
-        """Auto re-layout grid on window resize if column count changes."""
+        """Auto re-layout grid on window resize if column count changes (debounced)."""
         if event and event.widget != self:
             return
 
         if self.grid_cols_setting == "Tự động" and self._cached_results:
-            new_cols = self._get_column_count()
-            if getattr(self, "_last_cols", None) != new_cols:
-                self._render_grid(self._cached_results)
+            if getattr(self, "_resize_timer", None) is not None:
+                try:
+                    self.after_cancel(self._resize_timer)
+                except Exception:
+                    pass
+
+            def do_resize():
+                self._resize_timer = None
+                new_cols = self._get_column_count()
+                if getattr(self, "_last_cols", None) != new_cols:
+                    self._render_grid(self._cached_results)
+
+            self._resize_timer = self.after(50, do_resize)
