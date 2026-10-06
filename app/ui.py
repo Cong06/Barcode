@@ -33,6 +33,7 @@ class App(ctk.CTk):
         self.scale_factor = 1.0
         self.grid_cols_setting = "Tự động"
         self.color_palette_name = "Cổ điển"
+        self.show_text_setting = True  # Default: Show text under barcode ("Có")
 
         # Color Palettes
         self.color_palettes = {
@@ -318,6 +319,45 @@ class App(ctk.CTk):
         self.color_selector.set("Cổ điển")
         self.color_selector.pack(fill="x", pady=(0, 8))
 
+        # 4D: Hiển thị văn bản bên dưới mã (Bắt buộc chọn 1 trong 2: Có / Không, Mặc định: Có)
+        ctk.CTkLabel(
+            config_frame,
+            text="Hiển thị văn bản bên dưới mã:",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#991B1B",
+        ).pack(anchor="w", pady=(2, 2))
+
+        chk_text_frame = ctk.CTkFrame(config_frame, fg_color="transparent")
+        chk_text_frame.pack(fill="x", pady=(2, 4))
+
+        self.chk_show_text_yes = ctk.CTkCheckBox(
+            chk_text_frame,
+            text="Có",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#0F172A",
+            fg_color="#DC2626",
+            hover_color="#B91C1C",
+            checkmark_color="#FFFFFF",
+            command=lambda: self._on_show_text_toggle("Có"),
+        )
+        self.chk_show_text_yes.pack(side="left", padx=(0, 24))
+
+        self.chk_show_text_no = ctk.CTkCheckBox(
+            chk_text_frame,
+            text="Không",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#0F172A",
+            fg_color="#DC2626",
+            hover_color="#B91C1C",
+            checkmark_color="#FFFFFF",
+            command=lambda: self._on_show_text_toggle("Không"),
+        )
+        self.chk_show_text_no.pack(side="left")
+
+        # Set default state: "Có" selected, "Không" deselected
+        self.chk_show_text_yes.select()
+        self.chk_show_text_no.deselect()
+
         # --- Section 5: Footer Credit (Bottom-Left Corner) ---
         footer_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
         footer_frame.pack(side="bottom", fill="x", padx=18, pady=(0, 14))
@@ -438,6 +478,20 @@ class App(ctk.CTk):
 
         if self._last_entries:
             self._trigger_generation()
+
+    def _on_show_text_toggle(self, option):
+        """Toggle text visibility setting with exclusive selection between 'Có' and 'Không'."""
+        if option == "Có":
+            self.show_text_setting = True
+            self.chk_show_text_yes.select()
+            self.chk_show_text_no.deselect()
+        else:
+            self.show_text_setting = False
+            self.chk_show_text_no.select()
+            self.chk_show_text_yes.deselect()
+
+        if self._cached_results:
+            self._render_grid(self._cached_results)
 
     # ================================================================
     #  GENERATION LOGIC
@@ -657,21 +711,23 @@ class App(ctk.CTk):
 
                 # Render barcode/QR image inside transparent centered container
                 img_container = ctk.CTkFrame(card, fg_color="transparent")
-                img_container.pack(fill="x", padx=14, pady=(14, 6))
+                img_pady = (14, 6) if self.show_text_setting else (14, 14)
+                img_container.pack(fill="x", padx=14, pady=img_pady)
 
                 ctk.CTkLabel(
                     img_container, image=ctk_img, text="", anchor="center"
                 ).pack(anchor="center")
 
-            # Centered Text label below barcode
-            disp_text = text if len(text) <= 38 else text[:35] + "..."
-            ctk.CTkLabel(
-                card,
-                text=disp_text,
-                font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
-                text_color="#991B1B",
-                anchor="center",
-            ).pack(padx=14, pady=(2, 12), fill="x")
+            # Centered Text label below barcode (optional based on show_text_setting)
+            if self.show_text_setting:
+                disp_text = text if len(text) <= 38 else text[:35] + "..."
+                ctk.CTkLabel(
+                    card,
+                    text=disp_text,
+                    font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+                    text_color="#991B1B",
+                    anchor="center",
+                ).pack(padx=14, pady=(2, 12), fill="x")
 
             # Bind click handler for Lightbox Spotlight modal
             self._bind_card_click(card, item)
@@ -878,7 +934,10 @@ class App(ctk.CTk):
             self.spotlight_img_label.configure(image=ctk_img)
 
         # Update text labels
-        self.spotlight_text_lbl.configure(text=item["text"])
+        if self.show_text_setting:
+            self.spotlight_text_lbl.configure(text=item["text"])
+        else:
+            self.spotlight_text_lbl.configure(text="")
         self.spotlight_format_lbl.configure(text=f"Định dạng: {self.current_mode}")
 
         # Update button states (Disabled on boundary ends)
