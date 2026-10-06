@@ -696,14 +696,18 @@ class App(ctk.CTk):
         self._update_spotlight_content(animated=True)
 
     def _build_spotlight_modal(self):
-        """Build full-screen dark backdrop overlay and spotlight dialog box."""
-        # Soft frosted backdrop overlay covering entire app window (mờ đục nhẹ)
-        self.lightbox_overlay = ctk.CTkFrame(
-            self,
-            fg_color="#64748B",
-            corner_radius=0,
-        )
-        self.lightbox_overlay.place(x=0, y=0, relwidth=1, relheight=1)
+        """Build full-screen semi-transparent backdrop overlay and crisp spotlight dialog box."""
+        # 1. Semi-transparent backdrop overlay window (mờ đục trong suốt 25% nhìn thấy UI bên dưới)
+        self.lightbox_overlay = tk.Toplevel(self)
+        self.lightbox_overlay.overrideredirect(True)
+        self.lightbox_overlay.attributes("-alpha", 0.25)
+        self.lightbox_overlay.configure(bg="#0F172A")
+
+        w = max(self.winfo_width(), 1000)
+        h = max(self.winfo_height(), 700)
+        x = self.winfo_rootx() if self.winfo_rootx() > 0 else 50
+        y = self.winfo_rooty() if self.winfo_rooty() > 0 else 50
+        self.lightbox_overlay.geometry(f"{w}x{h}+{x}+{y}")
 
         # Dimmed backdrop click closes modal
         self.lightbox_overlay.bind("<Button-1>", lambda e: self._close_spotlight())
@@ -714,24 +718,26 @@ class App(ctk.CTk):
         else:
             init_w, init_h = 480, 520
 
-        # Spotlight Modal Container
-        self.spotlight_dialog = ctk.CTkFrame(
-            self.lightbox_overlay,
+        # 2. Spotlight Modal Container (Crisp 100% solid white card)
+        self.spotlight_dialog = ctk.CTkToplevel(self, width=init_w, height=init_h)
+        self.spotlight_dialog.overrideredirect(True)
+        self.spotlight_dialog.attributes("-topmost", True)
+
+        cx = x + (w - init_w) // 2
+        cy = y + (h - init_h) // 2
+        self.spotlight_dialog.geometry(f"{init_w}x{init_h}+{cx}+{cy}")
+
+        card = ctk.CTkFrame(
+            self.spotlight_dialog,
             fg_color="#FFFFFF",
             corner_radius=18,
             border_width=2,
             border_color="#FCA5A5",
-            width=init_w,
-            height=init_h,
         )
-        self.spotlight_dialog.place(relx=0.5, rely=0.5, anchor="center")
-        self.spotlight_dialog.pack_propagate(False)
-
-        # Prevent click on dialog from closing backdrop
-        self.spotlight_dialog.bind("<Button-1>", lambda e: "break")
+        card.pack(fill="both", expand=True)
 
         # --- Modal Header ---
-        header = ctk.CTkFrame(self.spotlight_dialog, fg_color="transparent")
+        header = ctk.CTkFrame(card, fg_color="transparent")
         header.pack(fill="x", padx=20, pady=(14, 6))
 
         badge = ctk.CTkFrame(header, fg_color="#FEE2E2", corner_radius=6)
@@ -769,13 +775,13 @@ class App(ctk.CTk):
         btn_close.pack(side="right")
 
         # Divider
-        ctk.CTkFrame(self.spotlight_dialog, height=1, fg_color="#FECDD3").pack(
+        ctk.CTkFrame(card, height=1, fg_color="#FECDD3").pack(
             fill="x", padx=20, pady=2
         )
 
         # --- Image Display Container ---
         self.spotlight_img_container = ctk.CTkFrame(
-            self.spotlight_dialog,
+            card,
             fg_color="#F8FAFC",
             border_color="#E2E8F0",
             border_width=1,
@@ -790,7 +796,7 @@ class App(ctk.CTk):
 
         # --- Code Text & Format Label ---
         self.spotlight_text_lbl = ctk.CTkLabel(
-            self.spotlight_dialog,
+            card,
             text="",
             font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"),
             text_color="#991B1B",
@@ -799,7 +805,7 @@ class App(ctk.CTk):
         self.spotlight_text_lbl.pack(padx=20, pady=(4, 1))
 
         self.spotlight_format_lbl = ctk.CTkLabel(
-            self.spotlight_dialog,
+            card,
             text="",
             font=ctk.CTkFont(size=11),
             text_color="#DC2626",
@@ -807,7 +813,7 @@ class App(ctk.CTk):
         self.spotlight_format_lbl.pack(padx=20, pady=(0, 8))
 
         # --- Navigation Footer ---
-        footer = ctk.CTkFrame(self.spotlight_dialog, fg_color="transparent")
+        footer = ctk.CTkFrame(card, fg_color="transparent")
         footer.pack(fill="x", padx=20, pady=(4, 16))
 
         self.btn_spotlight_prev = ctk.CTkButton(
@@ -913,6 +919,11 @@ class App(ctk.CTk):
             (final_w, final_h),
         ]
 
+        w = max(self.winfo_width(), 1000)
+        h = max(self.winfo_height(), 700)
+        x = self.winfo_rootx() if self.winfo_rootx() > 0 else 50
+        y = self.winfo_rooty() if self.winfo_rooty() > 0 else 50
+
         def step(idx):
             if (
                 idx < len(sizes)
@@ -920,9 +931,12 @@ class App(ctk.CTk):
                 and self.spotlight_dialog
                 and self.spotlight_dialog.winfo_exists()
             ):
-                w, h = sizes[idx]
-                self.spotlight_dialog.configure(width=w, height=h)
-                self.after(25, lambda: step(idx + 1))
+                cur_w, cur_h = sizes[idx]
+                cx = x + (w - cur_w) // 2
+                cy = y + (h - cur_h) // 2
+                self.spotlight_dialog.geometry(f"{cur_w}x{cur_h}+{cx}+{cy}")
+                if idx + 1 < len(sizes):
+                    self.after(20, lambda: step(idx + 1))
 
         step(0)
 
@@ -946,7 +960,11 @@ class App(ctk.CTk):
         self._spotlight_next()
 
     def _close_spotlight(self):
-        """Destroy overlay and unbind spotlight shortcut keys."""
+        """Destroy overlay windows and unbind spotlight shortcut keys."""
+        if hasattr(self, "spotlight_dialog") and self.spotlight_dialog and self.spotlight_dialog.winfo_exists():
+            self.spotlight_dialog.destroy()
+            self.spotlight_dialog = None
+
         if hasattr(self, "lightbox_overlay") and self.lightbox_overlay and self.lightbox_overlay.winfo_exists():
             self.lightbox_overlay.destroy()
             self.lightbox_overlay = None
