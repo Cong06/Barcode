@@ -810,7 +810,7 @@ class App(ctk.CTk):
             width=init_w,
             height=init_h,
         )
-        self.spotlight_dialog.place(relx=0.5, rely=0.5, anchor="center")
+        self.spotlight_dialog.place(relx=0.5, rely=0.56, anchor="center")
         self.spotlight_dialog.pack_propagate(False)
 
         # Prevent click on dialog from closing backdrop
@@ -989,72 +989,50 @@ class App(ctk.CTk):
     @staticmethod
     def _ease_out_cubic(t: float) -> float:
         """Ease-out cubic interpolation: f(t) = 1 - (1 - t)^3 for 0 <= t <= 1."""
-        t = max(0.0, min(1.0, t))
-        return 1.0 - (1.0 - t) ** 3
+        return 1.0 - (1.0 - max(0.0, min(1.0, t))) ** 3
 
     def _animate_spotlight_open(self):
-        """Smooth 60 FPS Ease-Out Cubic popup animation for spotlight modal."""
+        """Smooth slide-up animation using place(rely=...) — avoids CTkFrame canvas redraw artifacts.
+
+        The dialog is already built at final size. We only animate its vertical
+        position from slightly below center (rely=0.56) to center (rely=0.50).
+        Tk's place geometry manager repositions the widget without triggering
+        CustomTkinter's internal canvas redraw, so the rounded corners and
+        border stay crisp throughout the animation.
+        """
         if not hasattr(self, "spotlight_dialog") or not self.spotlight_dialog or not self.spotlight_dialog.winfo_exists():
             return
 
-        if self.current_mode != "QR Code":
-            final_w, final_h = 560, 480
-        else:
-            final_w, final_h = 480, 520
+        start_rely = 0.56       # Start position: slightly below center
+        end_rely = 0.50         # End position: perfectly centered
+        total_frames = 15       # ~240ms at 16ms/frame ≈ 60 FPS
+        frame_ms = 16
 
-        start_w, start_h = int(final_w * 0.80), int(final_h * 0.80)
-        total_steps = 14  # ~220ms at 16ms interval (60 FPS)
-
-        def step(current_step):
+        def frame(i):
             if (
-                current_step <= total_steps
+                i <= total_frames
                 and hasattr(self, "spotlight_dialog")
                 and self.spotlight_dialog
                 and self.spotlight_dialog.winfo_exists()
             ):
-                t = current_step / total_steps
-                factor = self._ease_out_cubic(t)
-                w = int(start_w + (final_w - start_w) * factor)
-                h = int(start_h + (final_h - start_h) * factor)
-                self.spotlight_dialog.configure(width=w, height=h)
-                if current_step < total_steps:
-                    self.after(16, lambda: step(current_step + 1))
+                t = i / total_frames
+                eased = self._ease_out_cubic(t)
+                current_rely = start_rely + (end_rely - start_rely) * eased
+                self.spotlight_dialog.place_configure(rely=current_rely)
+                if i < total_frames:
+                    self.after(frame_ms, lambda: frame(i + 1))
 
-        step(0)
+        frame(0)
 
     def _spotlight_prev(self):
         if self._spotlight_index > 0:
             self._spotlight_index -= 1
             self._update_spotlight_content(animated=False)
-            self._animate_spotlight_transition(direction=-1)
 
     def _spotlight_next(self):
         if self._spotlight_index < len(self._spotlight_valid_items) - 1:
             self._spotlight_index += 1
             self._update_spotlight_content(animated=False)
-            self._animate_spotlight_transition(direction=1)
-
-    def _animate_spotlight_transition(self, direction=1):
-        """Smooth slide transition for spotlight content when navigating."""
-        if not hasattr(self, "spotlight_img_container") or not self.spotlight_img_container or not self.spotlight_img_container.winfo_exists():
-            return
-
-        offset_start = 18 if direction > 0 else -18
-        steps = 6
-
-        def step(i):
-            if i <= steps and hasattr(self, "spotlight_img_container") and self.spotlight_img_container and self.spotlight_img_container.winfo_exists():
-                t = i / steps
-                current_offset = int(offset_start * (1.0 - self._ease_out_cubic(t)))
-                left_pad = max(20 + current_offset, 4)
-                right_pad = max(20 - current_offset, 4)
-                self.spotlight_img_container.pack_configure(padx=(left_pad, right_pad))
-                if i < steps:
-                    self.after(16, lambda: step(i + 1))
-                else:
-                    self.spotlight_img_container.pack_configure(padx=20)
-
-        step(0)
 
     def _on_spotlight_esc(self, event=None):
         self._close_spotlight()
@@ -1066,51 +1044,27 @@ class App(ctk.CTk):
         self._spotlight_next()
 
     def _close_spotlight(self):
-        """Smooth shrink & close animation for spotlight modal."""
-        if getattr(self, "_is_closing_spotlight", False):
-            return
+        """Close spotlight without visual tearing.
 
-        # Unbind shortcut keys immediately
+        CTkFrame.destroy() tears because the internal canvas (which draws
+        rounded corners) is cleaned up before the raw tkinter frame disappears,
+        causing a 1-2 frame flash of a square widget. Fix: hide everything
+        from view first with place_forget(), then destroy in the next event
+        loop tick where it's already invisible.
+        """
         self.unbind("<Escape>")
         self.unbind("<Left>")
         self.unbind("<Right>")
 
-        if not hasattr(self, "lightbox_overlay") or not self.lightbox_overlay or not self.lightbox_overlay.winfo_exists():
-            return
-
-        self._is_closing_spotlight = True
-
-        if hasattr(self, "spotlight_dialog") and self.spotlight_dialog and self.spotlight_dialog.winfo_exists():
-            cur_w = self.spotlight_dialog.winfo_width()
-            cur_h = self.spotlight_dialog.winfo_height()
-            target_w = int(cur_w * 0.82)
-            target_h = int(cur_h * 0.82)
-            total_steps = 9  # ~140ms at 16ms interval
-
-            def step(current_step):
-                if current_step <= total_steps and hasattr(self, "spotlight_dialog") and self.spotlight_dialog and self.spotlight_dialog.winfo_exists():
-                    t = current_step / total_steps
-                    factor = 1.0 - self._ease_out_cubic(t)  # Ease in shrink
-                    w = int(target_w + (cur_w - target_w) * factor)
-                    h = int(target_h + (cur_h - target_h) * factor)
-                    self.spotlight_dialog.configure(width=w, height=h)
-                    if current_step < total_steps:
-                        self.after(16, lambda: step(current_step + 1))
-                    else:
-                        self._finish_close_spotlight()
-                else:
-                    self._finish_close_spotlight()
-
-            step(0)
-        else:
-            self._finish_close_spotlight()
-
-    def _finish_close_spotlight(self):
-        """Destroy overlay and reset closing state."""
         if hasattr(self, "lightbox_overlay") and self.lightbox_overlay and self.lightbox_overlay.winfo_exists():
-            self.lightbox_overlay.destroy()
+            overlay = self.lightbox_overlay
             self.lightbox_overlay = None
-        self._is_closing_spotlight = False
+
+            # Hide from view instantly — no visual artifacts possible
+            overlay.place_forget()
+
+            # Destroy in the next tick when it's already invisible
+            self.after(1, overlay.destroy)
 
     # ================================================================
     #  RESIZE LISTENER
