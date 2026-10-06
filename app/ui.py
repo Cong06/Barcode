@@ -3,11 +3,8 @@ Main UI module for Barcode Generator.
 Red & White Modern Edition layout with split resizable PanedWindow.
 """
 
-import re
-import tkinter as tk
-import customtkinter as ctk
-from PIL import Image, ImageTk
-from app.validator import validate
+import os
+import sys
 import re
 import tkinter as tk
 import customtkinter as ctk
@@ -16,6 +13,12 @@ from app.validator import validate
 from app.barcode_generator import generate_code128
 from app.qr_generator import generate_qrcode
 
+
+def get_asset_path(relative_path: str) -> str:
+    """Get absolute path to resource, works for dev and for PyInstaller."""
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 
 class App(ctk.CTk):
@@ -27,6 +30,13 @@ class App(ctk.CTk):
         self.geometry("1280x840")
         self.minsize(820, 580)
         ctk.set_appearance_mode("light")
+
+        icon_path = get_asset_path(os.path.join("assets", "icon.ico"))
+        if os.path.exists(icon_path):
+            try:
+                self.iconbitmap(icon_path)
+            except Exception:
+                pass
 
         # --- State Variables ---
         self.current_mode = "Code 128C"
