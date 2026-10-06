@@ -97,11 +97,11 @@ class App(ctk.CTk):
     def _build_left_pane(self):
         # --- Header Section ---
         header_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
-        header_frame.pack(fill="x", padx=18, pady=(16, 6))
+        header_frame.pack(fill="x", padx=16, pady=(10, 2))
 
         # Red & White Edition Badge
         badge = ctk.CTkFrame(header_frame, fg_color="#FEE2E2", corner_radius=6)
-        badge.pack(anchor="w", pady=(0, 4))
+        badge.pack(anchor="w", pady=(0, 2))
 
         ctk.CTkLabel(
             badge,
@@ -113,27 +113,27 @@ class App(ctk.CTk):
         ctk.CTkLabel(
             header_frame,
             text="Barcode Generator",
-            font=ctk.CTkFont(size=24, weight="bold"),
+            font=ctk.CTkFont(size=22, weight="bold"),
             text_color="#991B1B",
         ).pack(anchor="w")
 
         ctk.CTkLabel(
             header_frame,
             text="Tạo mã vạch Code 128 (Auto, A, B, C) & QR Code nét cao",
-            font=ctk.CTkFont(size=12),
+            font=ctk.CTkFont(size=11),
             text_color="#DC2626",
         ).pack(anchor="w")
 
         # --- Section 1: Mode Selector (Dropdown Box) ---
         mode_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
-        mode_frame.pack(fill="x", padx=18, pady=(10, 6))
+        mode_frame.pack(fill="x", padx=16, pady=(4, 4))
 
         ctk.CTkLabel(
             mode_frame,
             text="🎯 Chọn loại mã:",
-            font=ctk.CTkFont(size=13, weight="bold"),
+            font=ctk.CTkFont(size=12, weight="bold"),
             text_color="#991B1B",
-        ).pack(anchor="w", pady=(0, 4))
+        ).pack(anchor="w", pady=(0, 2))
 
         self.mode_selector = ctk.CTkOptionMenu(
             mode_frame,
@@ -148,24 +148,24 @@ class App(ctk.CTk):
             dropdown_fg_color="#FFFFFF",
             dropdown_text_color="#0F172A",
             dropdown_hover_color="#FEE2E2",
-            height=36,
-            corner_radius=8,
+            height=32,
+            corner_radius=6,
         )
         self.mode_selector.set("Code 128C")
         self.mode_selector.pack(fill="x")
 
         # --- Section 2: Input Textarea + Balanced Refresh Button ---
         input_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
-        input_frame.pack(fill="x", padx=18, pady=(8, 4))
+        input_frame.pack(fill="x", padx=16, pady=(4, 2))
 
         # Title row with Refresh button
         input_title_row = ctk.CTkFrame(input_frame, fg_color="transparent")
-        input_title_row.pack(fill="x", pady=(0, 4))
+        input_title_row.pack(fill="x", pady=(0, 2))
 
         ctk.CTkLabel(
             input_title_row,
             text="📝 Danh sách mã:",
-            font=ctk.CTkFont(size=13, weight="bold"),
+            font=ctk.CTkFont(size=12, weight="bold"),
             text_color="#991B1B",
         ).pack(side="left")
 
@@ -173,14 +173,14 @@ class App(ctk.CTk):
         self.btn_clear = ctk.CTkButton(
             input_title_row,
             text="🔄 Refresh",
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(size=10, weight="bold"),
             fg_color="#FEF2F2",
             text_color="#DC2626",
             hover_color="#FEE2E2",
             border_color="#FCA5A5",
             border_width=1,
-            width=95,
-            height=28,
+            width=85,
+            height=24,
             corner_radius=6,
             command=self._clear_input,
         )
@@ -188,8 +188,8 @@ class App(ctk.CTk):
 
         self.textbox = ctk.CTkTextbox(
             input_frame,
-            height=150,
-            font=ctk.CTkFont(family="Segoe UI", size=13),
+            height=110,
+            font=ctk.CTkFont(family="Segoe UI", size=12),
             border_width=1.5,
             border_color="#FCA5A5",
             fg_color="#FFFFFF",
@@ -199,12 +199,12 @@ class App(ctk.CTk):
 
         # Helper & line counter row
         info_row = ctk.CTkFrame(input_frame, fg_color="transparent")
-        info_row.pack(fill="x", pady=(4, 0))
+        info_row.pack(fill="x", pady=(2, 0))
 
         self.helper_label = ctk.CTkLabel(
             info_row,
             text="Chỉ chứa số, số lượng chữ số chẵn",
-            font=ctk.CTkFont(size=11),
+            font=ctk.CTkFont(size=10),
             text_color="#DC2626",
         )
         self.helper_label.pack(side="left")
@@ -212,7 +212,7 @@ class App(ctk.CTk):
         self.count_label = ctk.CTkLabel(
             info_row,
             text="Số lượng: 0",
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(size=10, weight="bold"),
             text_color="#991B1B",
         )
         self.count_label.pack(side="right")
@@ -223,133 +223,145 @@ class App(ctk.CTk):
 
         # --- Section 3: Primary Generate Button (Bright Crimson Red) ---
         btn_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
-        btn_frame.pack(fill="x", padx=18, pady=(8, 10))
+        btn_frame.pack(fill="x", padx=16, pady=(4, 4))
 
         self.btn_generate = ctk.CTkButton(
             btn_frame,
             text="🚀 TẠO MÃ  (Ctrl+Enter)",
-            font=ctk.CTkFont(size=14, weight="bold"),
-            height=44,
+            font=ctk.CTkFont(size=13, weight="bold"),
+            height=36,
             fg_color="#DC2626",
             hover_color="#B91C1C",
-            corner_radius=10,
+            corner_radius=8,
             command=self._trigger_generation,
         )
         self.btn_generate.pack(fill="x")
 
         # Separator line
-        ctk.CTkFrame(self.left_pane, height=1.5, fg_color="#FECDD3").pack(
-            fill="x", padx=18, pady=4
+        ctk.CTkFrame(self.left_pane, height=1, fg_color="#FECDD3").pack(
+            fill="x", padx=16, pady=2
         )
 
         # --- Section 4: Display Configuration Controls (High Contrast Fonts & Text) ---
         config_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
-        config_frame.pack(fill="x", padx=18, pady=(6, 12))
+        config_frame.pack(fill="x", padx=16, pady=(2, 4))
 
         ctk.CTkLabel(
             config_frame,
             text="⚙️ CẤU HÌNH HIỂN THỊ",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=11, weight="bold"),
             text_color="#991B1B",
-        ).pack(anchor="w", pady=(0, 6))
+        ).pack(anchor="w", pady=(0, 2))
 
-        # 4A: Kích thước mã (Zoom scale) - High Contrast Unselected Text
+        # 4A: Kích thước mã (Zoom scale)
         ctk.CTkLabel(
             config_frame,
             text="Kích thước mã:",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=11, weight="bold"),
             text_color="#991B1B",
-        ).pack(anchor="w", pady=(2, 2))
+        ).pack(anchor="w", pady=(1, 1))
 
         self.size_selector = ctk.CTkSegmentedButton(
             config_frame,
             values=["75%", "100%", "130%", "160%"],
             command=self._on_size_change,
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(size=10, weight="bold"),
             selected_color="#DC2626",
             selected_hover_color="#B91C1C",
             unselected_color="#F1F5F9",
             unselected_hover_color="#E2E8F0",
             text_color="#0F172A",
+            height=26,
         )
         self.size_selector.set("100%")
-        self.size_selector.pack(fill="x", pady=(0, 8))
+        self.size_selector.pack(fill="x", pady=(0, 3))
 
-        # 4B: Số cột hiển thị (Grid columns) - High Contrast Unselected Text
+        # 4B: Số cột hiển thị (Grid columns)
         ctk.CTkLabel(
             config_frame,
             text="Số mã trên 1 dòng (Số cột):",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=11, weight="bold"),
             text_color="#991B1B",
-        ).pack(anchor="w", pady=(2, 2))
+        ).pack(anchor="w", pady=(1, 1))
 
         self.cols_selector = ctk.CTkSegmentedButton(
             config_frame,
             values=["Tự động", "1 Cột", "2 Cột", "3 Cột"],
             command=self._on_cols_change,
-            font=ctk.CTkFont(size=11, weight="bold"),
+            font=ctk.CTkFont(size=10, weight="bold"),
             selected_color="#DC2626",
             selected_hover_color="#B91C1C",
             unselected_color="#F1F5F9",
             unselected_hover_color="#E2E8F0",
             text_color="#0F172A",
+            height=26,
         )
         self.cols_selector.set("Tự động")
-        self.cols_selector.pack(fill="x", pady=(0, 8))
+        self.cols_selector.pack(fill="x", pady=(0, 3))
 
         # 4C: Màu sắc mã vạch / QR
         ctk.CTkLabel(
             config_frame,
             text="Màu sắc mã:",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=11, weight="bold"),
             text_color="#991B1B",
-        ).pack(anchor="w", pady=(2, 2))
+        ).pack(anchor="w", pady=(1, 1))
 
         self.color_selector = ctk.CTkOptionMenu(
             config_frame,
             values=list(self.color_palettes.keys()),
             command=self._on_color_change,
-            font=ctk.CTkFont(size=12, weight="bold"),
-            dropdown_font=ctk.CTkFont(size=12),
+            font=ctk.CTkFont(size=11, weight="bold"),
+            dropdown_font=ctk.CTkFont(size=11),
             fg_color="#991B1B",
             button_color="#7F1D1D",
             button_hover_color="#B91C1C",
             text_color="#FFFFFF",
+            height=28,
+            corner_radius=6,
         )
         self.color_selector.set("Cổ điển")
-        self.color_selector.pack(fill="x", pady=(0, 8))
+        self.color_selector.pack(fill="x", pady=(0, 3))
 
         # 4D: Hiển thị văn bản bên dưới mã (Bắt buộc chọn 1 trong 2: Có / Không, Mặc định: Có)
         ctk.CTkLabel(
             config_frame,
             text="Hiển thị văn bản bên dưới mã:",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=11, weight="bold"),
             text_color="#991B1B",
-        ).pack(anchor="w", pady=(2, 2))
+        ).pack(anchor="w", pady=(1, 1))
 
         chk_text_frame = ctk.CTkFrame(config_frame, fg_color="transparent")
-        chk_text_frame.pack(fill="x", pady=(2, 4))
+        chk_text_frame.pack(fill="x", pady=(1, 2))
 
         self.chk_show_text_yes = ctk.CTkCheckBox(
             chk_text_frame,
             text="Có",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=11, weight="bold"),
             text_color="#0F172A",
             fg_color="#DC2626",
             hover_color="#B91C1C",
             checkmark_color="#FFFFFF",
+            checkbox_width=16,
+            checkbox_height=16,
+            border_width=2,
+            height=20,
             command=lambda: self._on_show_text_toggle("Có"),
         )
-        self.chk_show_text_yes.pack(side="left", padx=(0, 24))
+        self.chk_show_text_yes.pack(side="left", padx=(0, 20))
 
         self.chk_show_text_no = ctk.CTkCheckBox(
             chk_text_frame,
             text="Không",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=11, weight="bold"),
             text_color="#0F172A",
             fg_color="#DC2626",
             hover_color="#B91C1C",
             checkmark_color="#FFFFFF",
+            checkbox_width=16,
+            checkbox_height=16,
+            border_width=2,
+            height=20,
             command=lambda: self._on_show_text_toggle("Không"),
         )
         self.chk_show_text_no.pack(side="left")
@@ -360,7 +372,7 @@ class App(ctk.CTk):
 
         # --- Section 5: Footer Credit (Bottom-Left Corner) ---
         footer_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
-        footer_frame.pack(side="bottom", fill="x", padx=18, pady=(0, 14))
+        footer_frame.pack(side="bottom", fill="x", padx=16, pady=(0, 8))
 
         ctk.CTkLabel(
             footer_frame,
