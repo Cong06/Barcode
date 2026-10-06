@@ -4,7 +4,7 @@
 > **Last Updated**: 2026-09-30
 > **Platform**: Windows Desktop
 > **Language**: Python 3.x
-> **Supported Code Types**: Code 128C, QR Code
+> **Supported Code Types**: Code 128 (Auto), Code 128A, Code 128B, Code 128C, QR Code
 
 ---
 

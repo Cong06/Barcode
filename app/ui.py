@@ -8,7 +8,12 @@ import tkinter as tk
 import customtkinter as ctk
 from PIL import Image, ImageTk
 from app.validator import validate
-from app.barcode_generator import generate_code128c
+import re
+import tkinter as tk
+import customtkinter as ctk
+from PIL import Image, ImageTk
+from app.validator import validate
+from app.barcode_generator import generate_code128
 from app.qr_generator import generate_qrcode
 
 
@@ -113,12 +118,12 @@ class App(ctk.CTk):
 
         ctk.CTkLabel(
             header_frame,
-            text="Tạo mã vạch Code 128C & QR Code nét cao",
+            text="Tạo mã vạch Code 128 (Auto, A, B, C) & QR Code nét cao",
             font=ctk.CTkFont(size=12),
             text_color="#DC2626",
         ).pack(anchor="w")
 
-        # --- Section 1: Mode Selector ---
+        # --- Section 1: Mode Selector (Dropdown Box) ---
         mode_frame = ctk.CTkFrame(self.left_pane, fg_color="transparent")
         mode_frame.pack(fill="x", padx=18, pady=(10, 6))
 
@@ -129,16 +134,21 @@ class App(ctk.CTk):
             text_color="#991B1B",
         ).pack(anchor="w", pady=(0, 4))
 
-        self.mode_selector = ctk.CTkSegmentedButton(
+        self.mode_selector = ctk.CTkOptionMenu(
             mode_frame,
-            values=["Code 128C", "QR Code"],
+            values=["Code 128", "Code 128A", "Code 128B", "Code 128C", "QR Code"],
             command=self._on_mode_change,
             font=ctk.CTkFont(size=12, weight="bold"),
-            selected_color="#DC2626",
-            selected_hover_color="#B91C1C",
-            unselected_color="#F1F5F9",
-            unselected_hover_color="#E2E8F0",
-            text_color="#0F172A",
+            dropdown_font=ctk.CTkFont(size=12),
+            fg_color="#DC2626",
+            button_color="#B91C1C",
+            button_hover_color="#991B1B",
+            text_color="#FFFFFF",
+            dropdown_fg_color="#FFFFFF",
+            dropdown_text_color="#0F172A",
+            dropdown_hover_color="#FEE2E2",
+            height=36,
+            corner_radius=8,
         )
         self.mode_selector.set("Code 128C")
         self.mode_selector.pack(fill="x")
@@ -396,10 +406,16 @@ class App(ctk.CTk):
 
     def _on_mode_change(self, value):
         self.current_mode = value
-        if value == "Code 128C":
-            self.helper_label.configure(text="Chỉ chứa số, số lượng chữ số chẵn")
+        if value == "Code 128":
+            self.helper_label.configure(text="Tất cả ký tự ASCII (chữ, số, ký tự đặc biệt)")
+        elif value == "Code 128A":
+            self.helper_label.configure(text="Chữ in hoa (A-Z), số, điều khiển (Không chữ thường)")
+        elif value == "Code 128B":
+            self.helper_label.configure(text="Chữ hoa, chữ thường (A-Z, a-z), số & ký tự in được")
+        elif value == "Code 128C":
+            self.helper_label.configure(text="Chỉ chứa số (0-9), số lượng chữ số chẵn")
         else:
-            self.helper_label.configure(text="Chấp nhận mọi văn bản / URL")
+            self.helper_label.configure(text="Chấp nhận mọi văn bản / URL (UTF-8)")
 
         if self._last_entries:
             self._trigger_generation()
@@ -453,8 +469,8 @@ class App(ctk.CTk):
             is_valid, error_msg = validate(original_text, self.current_mode)
 
             if is_valid:
-                if self.current_mode == "Code 128C":
-                    img = generate_code128c(
+                if self.current_mode != "QR Code":
+                    img = generate_code128(
                         original_text, fg_color=fg_color, bg_color=bg_color
                     )
                 else:
@@ -623,7 +639,7 @@ class App(ctk.CTk):
 
             if image is not None:
                 # Calculate scaled image dimensions
-                if self.current_mode == "Code 128C":
+                if self.current_mode != "QR Code":
                     target_w = max(int(260 * self.scale_factor), 140)
                     ratio = target_w / image.width
                     target_h = max(int(image.height * ratio), 50)
@@ -709,7 +725,7 @@ class App(ctk.CTk):
         self.lightbox_overlay.bind("<Button-1>", lambda e: self._close_spotlight())
 
         # Determine mode-dependent initial dialog size
-        if self.current_mode == "Code 128C":
+        if self.current_mode != "QR Code":
             init_w, init_h = 560, 480
         else:
             init_w, init_h = 480, 520
@@ -844,7 +860,7 @@ class App(ctk.CTk):
         # High-resolution rescaled image
         img = item["image"]
         if img:
-            if self.current_mode == "Code 128C":
+            if self.current_mode != "QR Code":
                 target_w = 420
                 ratio = target_w / img.width
                 target_h = max(int(img.height * ratio), 90)
@@ -899,7 +915,7 @@ class App(ctk.CTk):
 
     def _animate_spotlight_open(self):
         """Smooth popup animation for spotlight modal."""
-        if self.current_mode == "Code 128C":
+        if self.current_mode != "QR Code":
             final_w, final_h = 560, 480
         else:
             final_w, final_h = 480, 520
